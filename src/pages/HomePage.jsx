@@ -7,11 +7,21 @@ import Button from '../components/Button.jsx';
 
 export default function HomePage() {
   const features = [
-    { title: 'Verified Listings', desc: 'Trustworthy property information with transparency-first presentation.' },
-    { title: 'Real Reviews', desc: 'Read feedback from previous tenants & buyers (mock data stage).'},
-    { title: 'Secure Payments (Soon)', desc: 'Future integration with Bkash & banking APIs.'},
-    { title: 'Relocation Services', desc: 'Plan movers, packers & renovators in one place (mock placeholder).'},
-    { title: 'AI Valuation (Future)', desc: 'Upcoming intelligent pricing and negotiation assist.'}
+  { title: 'Verified Listings', tone:'primary', accent:'from-primary-500/15 to-primary-500/0', icon: (
+        <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary-600 dark:text-primary-400"><path fill="currentColor" d="M9.55 17.54 4.4 12.4l1.42-1.42 3.73 3.73 8.63-8.63 1.42 1.42Z"/></svg>
+      ), desc: 'Trustworthy property information with transparency-first presentation.' },
+  { title: 'Real Reviews', tone:'accent', accent:'from-accent-500/20 to-accent-500/0', icon: (
+        <svg viewBox="0 0 24 24" className="w-6 h-6 text-accent-500"><path fill="currentColor" d="M12 21q-.425 0-.713-.288Q11 20.425 11 20v-2h7q.825 0 1.413-.587Q20 16.825 20 16V6q0-.825-.587-1.412Q18.825 4 18 4H6q-.825 0-1.412.588Q4 5.175 4 6v10q0 .825.588 1.413Q5.175 18 6 18h3.5l2.15 2.15q.275.275.438.412.162.138.412.138Zm-6-7V6v10Zm2-1h10V6H8Zm-2 1V6v10Z"/></svg>
+      ), desc: 'Read feedback from previous tenants & buyers (mock data stage).' },
+  { title: 'Secure Payments (Soon)', tone:'primary', accent:'from-primary-600/15 to-primary-600/0', icon: (
+        <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary-600 dark:text-primary-400"><path fill="currentColor" d="M3 19V8h18v11Zm2-2h14v-7H5Zm0-9V5h14v3Zm7 6q.825 0 1.413-.587Q14 12.825 14 12t-.587-1.412Q12.825 10 12 10t-1.412.588Q10 11.175 10 12q0 .825.588 1.413Q11.175 14 12 14Z"/></svg>
+      ), desc: 'Future integration with Bkash & banking APIs.' },
+  { title: 'Relocation Services', tone:'primary', accent:'from-primary-400/15 to-primary-400/0', icon: (
+        <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary-500 dark:text-primary-300"><path fill="currentColor" d="m20 8-8-5-8 5v2h16ZM4 18h16v-8H4Zm8-2q-1.25 0-2.125-.875T9 13t.875-2.125T12 10t2.125.875T15 13t-.875 2.125T12 16Z"/></svg>
+      ), desc: 'Plan movers, packers & renovators in one place (mock placeholder).' },
+  { title: 'AI Valuation (Future)', tone:'accent', accent:'from-accent-400/20 to-accent-400/0', icon: (
+        <svg viewBox="0 0 24 24" className="w-6 h-6 text-accent-500"><path fill="currentColor" d="M12 21q-.825 0-1.412-.587Q10 19.825 10 19v-1H5q-.825 0-1.412-.587Q3 16.825 3 16v-3q0-.425.288-.712Q3.575 12 4 12t.712.288Q5 12.575 5 13v3h5v-2.1q-1.5-.35-2.475-1.6Q6.55 11.05 6.55 9.4q0-1.8 1.225-3.075Q9 5.05 10.8 5.025h2.4q1.8.025 3.025 1.3Q17.45 7.6 17.45 9.4q0 1.65-.975 2.9T14 13.9V16h5v-3q0-.425.288-.712Q19.575 12 20 12t.712.288Q21 12.575 21 13v3q0 .825-.587 1.413Q19.825 19 19 19h-5v1q0 .825-.587 1.413Q12.825 21 12 21Zm0-8q1.275 0 2.212-.862.938-.863.938-2.138t-.938-2.138Q13.275 7 12 7t-2.138.862Q9 8.725 9 10t.862 2.138Q10.725 13 12 13Z"/></svg>
+      ), desc: 'Upcoming intelligent pricing and negotiation assist.' }
   ];
 
   return (
@@ -51,18 +61,59 @@ export default function HomePage() {
       </div>
 
       {/* Feature Highlights */}
-      <Container className="py-16">
+      <Container className="py-24">
         <SectionHeading
           title="Why DreamNest?"
-          subtitle="A unified experience that brings listings, feedback and service planning together. All data is placeholder during the mock stage."
+          subtitle="A unified experience that blends discovery, trust, and future-ready tools. Everything you see here runs on mock content today—designed to set a high visual and UX bar before real data arrives."
           align="center"
+          titleClassName="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 dark:from-primary-300 dark:via-primary-400 dark:to-accent-300 drop-shadow-sm"
+          subtitleClassName="font-medium"
         />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-10 mb-28">
           {features.map(f => (
-            <Card key={f.title} className="p-5 flex flex-col">
-              <h3 className="font-semibold mb-2 text-lg">{f.title}</h3>
-              <p className="text-sm text-text-secondary dark:text-[#cbd5e1] flex-1">{f.desc}</p>
-            </Card>
+            <div
+              key={f.title}
+              className={`group relative flex flex-col rounded-3xl overflow-hidden border shadow-[0_6px_18px_-8px_rgba(0,0,0,0.25)] hover:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.35)] transition-all duration-400 backdrop-blur-sm
+               ${f.tone === 'primary' ? 'border-primary-200/70 dark:border-primary-300/20' : 'border-accent-200/70 dark:border-accent-300/20'}
+              `}
+            >
+              {/* Persistent background image */}
+              <div
+                className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-500"
+                style={{
+                  backgroundImage: f.tone === 'primary'
+                    ? 'url(https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=800)'
+                    : 'url(https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=800)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+                aria-hidden="true"
+              />
+              {/* Gradient overlays for readability */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${f.tone === 'primary' ? 'from-primary-50/90 via-white/80 to-white/60 dark:from-[#0f172a]/95 dark:via-[#0f172a]/85 dark:to-[#0f172a]/70' : 'from-accent-50/90 via-white/75 to-white/55 dark:from-[#0f172a]/95 dark:via-[#0f172a]/85 dark:to-[#0f172a]/70'}`} />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.9),rgba(255,255,255,0)_65%)] dark:bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.05),rgba(255,255,255,0)_65%)]" />
+              {/* Glow ring accent on hover */}
+              <div className={`pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r ${f.tone === 'primary' ? 'from-primary-400/40 via-primary-300/30 to-primary-400/40' : 'from-accent-400/40 via-accent-300/30 to-accent-400/40'} blur-[2px]`} />
+              <div className="relative p-7 flex flex-col flex-1">
+                <div className={`w-14 h-14 rounded-2xl grid place-items-center mb-6 shadow-md ring-4 ring-white/60 dark:ring-white/10 backdrop-blur-sm transition-colors duration-300 group-hover:scale-105 group-hover:shadow-lg
+                  ${f.tone === 'primary' ? 'bg-gradient-to-br from-white to-primary-50/60 text-primary-600 dark:from-[#1e293b] dark:to-[#334155] dark:text-primary-300' : 'bg-gradient-to-br from-white to-accent-50/60 text-accent-600 dark:from-[#1e293b] dark:to-[#334155] dark:text-accent-300'}`}
+                >
+                  {f.icon}
+                </div>
+                <h3 className="font-semibold text-xl md:text-[1.35rem] leading-snug tracking-tight mb-3 text-slate-900 dark:text-slate-100">
+                  <span className="relative inline-block after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 group-hover:after:w-full after:bg-gradient-to-r after:from-primary-500 after:to-accent-500 after:transition-all after:duration-500">{f.title}</span>
+                </h3>
+                <p className="text-sm md:text-[0.93rem] leading-relaxed text-slate-600 dark:text-slate-300 flex-1 font-medium/5">
+                  {f.desc}
+                </p>
+                <div className="mt-7 pt-5 flex items-center justify-between text-[11px] uppercase tracking-wide font-semibold text-slate-500 dark:text-slate-400 border-t border-slate-200/70 dark:border-slate-700/60">
+                  <span className="flex items-center gap-1 group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors">Coming Soon
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 opacity-60 group-hover:translate-x-0.5 group-hover:opacity-100 transition-all"><path fill="currentColor" d="m13.6 17-1.4-1.4 3.6-3.6-3.6-3.6L13.6 7 19 12.4Z"/></svg>
+                  </span>
+                  <span className="text-slate-400 dark:text-slate-500 font-normal normal-case">Preview</span>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
