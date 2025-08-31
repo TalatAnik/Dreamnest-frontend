@@ -17,15 +17,15 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <div className="relative border-b border-border/60 dark:border-[#334155] overflow-hidden">
+  <div className="relative border-b border-border/60 dark:border-[#334155] overflow-hidden">
         <div className="absolute inset-0">
           <img
             src="https://images.pexels.com/photos/7031403/pexels-photo-7031403.jpeg?auto=compress&cs=tinysrgb&w=1600"
             alt="City skyline"
-            className="w-full h-full object-cover object-center scale-105"
+    className="w-full h-full object-cover object-center"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/70 to-white/30 dark:from-[#0f172a]/90 dark:via-[#0f172a]/80 dark:to-[#0f172a]/40 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/65 via-white/35 to-white/10 dark:from-[#0f172a]/85 dark:via-[#0f172a]/55 dark:to-[#0f172a]/25" />
         </div>
         <Container className="py-24 md:py-32 text-center relative">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 drop-shadow-sm">
@@ -34,7 +34,7 @@ export default function HomePage() {
           <p className="text-text-secondary dark:text-[#cbd5e1] max-w-2xl mx-auto mb-8 text-sm md:text-base">
             Search properties, explore reviews, plan services & prepare for future AI insights — all in one modern interface.
           </p>
-          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 mb-6 bg-white/70 dark:bg-[#1e293b]/70 p-3 rounded-lg shadow-sm backdrop-blur">
+      <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 mb-6 bg-white/55 dark:bg-[#1e293b]/60 p-3 rounded-lg shadow-sm">
             <input
               type="text"
               placeholder="Search by city, area, or keyword (mock)"
