@@ -36,6 +36,8 @@ export default {
           DEFAULT: '#ffffff',
           alt: '#f1f5f9'
         },
+  base: '#f8fafc',
+  'base-dark': '#0f172a',
         success: '#16a34a',
         warning: '#d97706',
         error: '#dc2626',

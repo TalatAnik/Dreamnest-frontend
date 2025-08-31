@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 /* Global semantic helpers */
-:root {
-  --color-bg: #f8fafc;
+@layer base {
+  body { @apply bg-base text-text-primary antialiased; }
 }
-body { @apply bg-bg text-text-primary; }
