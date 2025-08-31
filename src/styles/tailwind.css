@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global semantic helpers */
+:root {
+  --color-bg: #f8fafc;
+}
+body { @apply bg-bg text-text-primary; }
