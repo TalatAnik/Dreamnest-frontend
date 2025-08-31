@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import SectionHeading from '../components/SectionHeading.jsx';

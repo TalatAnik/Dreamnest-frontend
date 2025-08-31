@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function SectionHeading({ title, subtitle, align='left', className='' }) {
   return (
     <div className={`mb-6 ${align === 'center' ? 'text-center mx-auto' : ''} ${className}`}>

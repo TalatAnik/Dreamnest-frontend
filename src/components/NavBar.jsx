@@ -1,5 +1,5 @@
+import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { useState } from 'react';
 
 const linkBase = 'text-sm font-medium px-3 py-2 rounded-md hover:bg-primary-50 dark:hover:bg-surface-alt transition-colors';
 

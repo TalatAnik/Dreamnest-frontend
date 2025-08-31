@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function FormField({ label, htmlFor, error, children, required }) {
   return (
     <div className="flex flex-col gap-1 mb-4">
