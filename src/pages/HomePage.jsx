@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import SectionHeading from '../components/SectionHeading.jsx';
-import Card from '../components/Card.jsx';
 import Button from '../components/Button.jsx';
 
 export default function HomePage() {
@@ -119,31 +118,52 @@ export default function HomePage() {
 
         <SectionHeading
           title="Featured Properties"
-          subtitle="Early mock examples of property cards. Real data will replace these in a later phase."
+          subtitle="A quick look at polished card layouts we’ll reuse across listings and detail pages once mock data wiring (Phase 5) lands."
           align="center"
+          variant="gradient"
+          subtitleClassName="font-medium"
         />
-        <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1,2,3].map(i => (
-            <Card key={i} className="p-0 overflow-hidden group">
-              <div className="relative h-40 w-full overflow-hidden">
-                <img
-                  src={`https://images.pexels.com/photos/${i === 1 ? '259602' : i === 2 ? '1396132' : '106399'}/pexels-photo-${i === 1 ? '259602' : i === 2 ? '1396132' : '106399'}.jpeg?auto=compress&cs=tinysrgb&w=800`}
-                  alt={`Sample Property ${i}`}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-4 text-white">
-                  <h3 className="font-semibold mb-1">Sample Property {i}</h3>
-                  <p className="text-xs opacity-90">2 Bed • 1 Bath • 1200 sqft</p>
+        <section className="relative">
+          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-primary-50/40 to-transparent dark:from-primary-500/5" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7">
+            {[1,2,3,4].map(i => (
+              <div
+                key={i}
+                className="group relative rounded-2xl overflow-hidden bg-white dark:bg-[#1e293b] border-2 border-border dark:border-[#3a4a63] shadow-[0_5px_18px_-4px_rgba(0,0,0,0.22)] hover:shadow-[0_12px_34px_-6px_rgba(0,0,0,0.32)] transition-all duration-300 before:absolute before:inset-0 before:rounded-[1rem] before:p-[1.5px] before:bg-gradient-to-r before:from-primary-400/50 before:via-accent-400/40 before:to-primary-400/50 before:opacity-0 group-hover:before:opacity-100 before:transition-opacity after:pointer-events-none"
+              >
+                {/* Inner clipping layer to preserve background inside gradient frame */}
+                <div className="relative h-full w-full rounded-[0.95rem] overflow-hidden">
+                <div className="relative h-48 w-full overflow-hidden">
+                  <img
+                    src={`https://images.pexels.com/photos/${i === 1 ? '259602' : i === 2 ? '1396132' : i === 3 ? '106399' : '1571460'}/pexels-photo-${i === 1 ? '259602' : i === 2 ? '1396132' : i === 3 ? '106399' : '1571460'}.jpeg?auto=compress&cs=tinysrgb&w=800`}
+                    alt={`Sample Property ${i}`}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-transparent" />
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span className="px-2 py-1 rounded-md text-[11px] font-medium bg-white/90 backdrop-blur-sm text-slate-800 dark:bg-white/10 dark:text-white border border-white/60 dark:border-white/15">For Rent</span>
+                    <span className="px-2 py-1 rounded-md text-[11px] font-medium bg-primary-600 text-white shadow-sm">Featured</span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 p-4 text-white">
+                    <h3 className="font-semibold tracking-tight mb-1 text-sm md:text-base">Sample Property {i}</h3>
+                    <p className="text-[11px] md:text-xs opacity-90">2 Bed • 1 Bath • 1200 sqft</p>
+                  </div>
+                </div>
+                <div className="p-4 flex flex-col gap-3">
+                  <p className="text-sm text-text-secondary dark:text-[#cbd5e1] leading-relaxed">Short description placeholder for property highlights and location context.</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-primary-600 dark:text-primary-400">$1,250/mo</span>
+                    <Button size="sm" variant="outline" className="group/btn relative overflow-hidden">
+                      <span className="relative z-10">View</span>
+                      <span className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity bg-gradient-to-r from-primary-600 to-accent-500" />
+                    </Button>
+                  </div>
+                </div>
                 </div>
               </div>
-              <div className="p-4 flex flex-col gap-3">
-                <p className="text-sm text-text-secondary dark:text-[#cbd5e1]">Short description placeholder for property highlights and location.</p>
-                <Button size="sm">View</Button>
-              </div>
-            </Card>
-          ))}
+            ))}
+          </div>
         </section>
       </Container>
 
