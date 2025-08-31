@@ -38,7 +38,7 @@ export default function Footer() {
     <footer className="mt-20 border-t border-border/70 dark:border-[#334155] bg-surface dark:bg-[#0f172a] relative overflow-hidden">
       {/* Decorative gradient ring */}
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[640px] h-[640px] rounded-full bg-gradient-to-br from-primary-500/5 via-accent-400/5 to-primary-500/5 blur-3xl" />
-      <div className="max-w-6xl mx-auto px-4 lg:px-6 py-14 relative">
+  <div className="max-w-[1400px] mx-auto px-5 md:px-8 py-14 relative">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-12 lg:gap-10 text-sm">
           {/* Brand + Legal */}
           <div className="flex flex-col max-w-sm shrink-0 lg:w-[260px]">

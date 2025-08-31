@@ -10,7 +10,7 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 dark:border-[#334155]/70 backdrop-blur bg-white/85 dark:bg-[#1e293b]/75 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-[#1e293b]/60">
-      <div className="max-w-6xl mx-auto px-4 flex items-center h-16 gap-4">
+  <div className="max-w-[1400px] mx-auto px-5 md:px-8 flex items-center h-16 gap-4">
         <Link to="/" className="flex items-center gap-2 font-bold text-primary-600 dark:text-primary-300 tracking-tight">
           <span className="inline-block w-8 h-8 rounded-md bg-gradient-to-tr from-primary-500 to-accent-400 shadow-inner" aria-hidden="true" />
           <span>DreamNest</span>
