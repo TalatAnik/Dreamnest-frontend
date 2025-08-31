@@ -25,13 +25,13 @@ export default function HomePage() {
     className="w-full h-full object-cover object-center"
             loading="lazy"
           />
-      <div className="absolute inset-0 bg-gradient-to-br from-white/65 via-white/35 to-white/10 dark:from-[#0f172a]/85 dark:via-[#0f172a]/55 dark:to-[#0f172a]/25" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/40 to-black/20 dark:from-black/65 dark:via-black/50 dark:to-black/30" />
         </div>
         <Container className="py-24 md:py-32 text-center relative">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 drop-shadow-sm">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white drop-shadow-md">
             Find Your Next Home with Confidence
           </h1>
-          <p className="text-text-secondary dark:text-[#cbd5e1] max-w-2xl mx-auto mb-8 text-sm md:text-base">
+          <p className="max-w-2xl mx-auto mb-8 text-sm md:text-base text-white/85">
             Search properties, explore reviews, plan services & prepare for future AI insights — all in one modern interface.
           </p>
       <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 mb-6 bg-white/55 dark:bg-[#1e293b]/60 p-3 rounded-lg shadow-sm">
