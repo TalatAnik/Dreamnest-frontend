@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 import SectionHeading from '../components/SectionHeading.jsx';
+import PropertyCard from '../components/PropertyCard.jsx';
 
 export default function PropertiesPage() {
   const [filters, setFilters] = useState({
@@ -29,7 +30,10 @@ export default function PropertiesPage() {
     sqft: [1200, 1800, 800, 1100, 1600, 2200, 750, 1350, 1900, 650, 1000, 1550][i],
     image: `https://images.pexels.com/photos/${[1396122, 2121121, 2102587, 2343468, 2462015, 3555615, 2102586, 3288103, 3288100, 2462016, 2121120, 2343469][i]}/pexels-photo-${[1396122, 2121121, 2102587, 2343468, 2462015, 3555615, 2102586, 3288103, 3288100, 2462016, 2121120, 2343469][i]}.jpeg?auto=compress&cs=tinysrgb&w=800`,
     featured: i < 3,
-    available: true // All properties are available now
+    available: true, // All properties are available now
+    // Rating data - some properties don't have ratings (simulating real-world scenario)
+    rating: i % 5 === 0 ? null : Number((3.5 + (i * 0.2) % 2).toFixed(1)), // Some properties without ratings
+    totalReviews: i % 5 === 0 ? 0 : Math.floor(Math.random() * 50) + 3 // Reviews count (0 for no ratings)
   }));
 
   const propertyTypes = ['Any Type', 'Apartment', 'House', 'Condo', 'Studio'];
@@ -161,14 +165,14 @@ export default function PropertiesPage() {
                       placeholder="Min"
                       value={filters.priceMin}
                       onChange={(e) => handleFilterChange('priceMin', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      className="min-w-0 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Max"
                       value={filters.priceMax}
                       onChange={(e) => handleFilterChange('priceMax', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      className="min-w-0 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
                     />
                   </div>
                 </div>
@@ -296,92 +300,16 @@ export default function PropertiesPage() {
                 : 'grid grid-cols-1 gap-4'
               }>
                 {mockProperties.map((property) => (
-                  <div
+                  <PropertyCard 
                     key={property.id}
-                    className={`group bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/60 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl ${
-                      viewStyle === 'list' ? 'flex flex-col sm:flex-row' : ''
-                    }`}
-                  >
-                  {/* Property Image */}
-                  <div className={`relative overflow-hidden ${
-                    viewStyle === 'grid' 
-                      ? 'h-48' 
-                      : 'h-48 sm:h-40 sm:w-64 flex-shrink-0'
-                  }`}>
-                    <img
-                      src={property.image}
-                      alt={property.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                    
-                    {/* Overlay Elements */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                    
-                    {/* Featured Badge */}
-                    {property.featured && (
-                      <div className="absolute top-3 right-3 bg-accent-500 text-white text-xs font-medium px-2 py-1 rounded-full">
-                        Featured
-                      </div>
-                    )}
-
-                    {/* Price Badge */}
-                    <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-900 dark:text-white font-semibold px-3 py-1 rounded-lg">
-                      ৳{property.price.toLocaleString()}/mo
-                    </div>
-                  </div>
-
-                  {/* Property Details */}
-                  <div className={`${viewStyle === 'grid' ? 'p-5' : 'p-5 flex-1 flex flex-col justify-between'}`}>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        {property.title}
-                      </h3>
-                      
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {property.location}
-                      </p>
-
-                      {/* Property Stats */}
-                      <div className={`text-sm text-gray-600 dark:text-gray-400 mb-4 ${
-                        viewStyle === 'list' ? 'flex items-center gap-6' : 'flex items-center justify-between'
-                      }`}>
-                        <div className="flex items-center gap-4">
-                          <span className="flex items-center gap-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v0" />
-                            </svg>
-                            {property.bedrooms} bed
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3a2 2 0 002 2h4a2 2 0 002-2v-3" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14V9a2 2 0 012-2h4a2 2 0 012 2v5M8 14H6a2 2 0 00-2 2v3a2 2 0 002 2h2m8-7h2a2 2 0 012 2v3a2 2 0 01-2 2h-2" />
-                            </svg>
-                            {property.bathrooms} bath
-                          </span>
-                        </div>
-                        <span>{property.sqft} sqft</span>
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <Button
-                      size="sm"
-                      className={`group/btn relative overflow-hidden ${viewStyle === 'list' ? 'self-start' : 'w-full'}`}
-                    >
-                      <span className="relative z-10">
-                        View Details
-                      </span>
-                      <span className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity bg-gradient-to-r from-primary-600 to-accent-500" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                    property={property}
+                    viewStyle={viewStyle}
+                    onViewDetails={(property) => {
+                      console.log('View details for:', property.title);
+                      // TODO: Navigate to property detail page
+                    }}
+                  />
+                ))}
               </div>
             </div>
 
