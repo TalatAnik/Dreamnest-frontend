@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import RootLayout from './layout/RootLayout.jsx';
 import HomePage from './pages/HomePage.jsx';
+import PropertiesPage from './pages/PropertiesPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route element={<RootLayout />}> 
           <Route path="/" element={<HomePage />} />
+          <Route path="/properties" element={<PropertiesPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
