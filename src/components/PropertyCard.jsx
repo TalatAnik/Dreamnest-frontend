@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from './Button.jsx';
 
 export default function PropertyCard({ 
@@ -6,6 +7,15 @@ export default function PropertyCard({
   viewStyle = 'grid', 
   onViewDetails 
 }) {
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    if (onViewDetails) {
+      onViewDetails(property);
+    } else {
+      navigate(`/properties/${property.id}`);
+    }
+  };
   // Star rating component
   const StarRating = ({ rating, totalReviews }) => {
     if (!rating) return null; // Don't show rating if not available
@@ -141,7 +151,7 @@ export default function PropertyCard({
         <Button
           size="sm"
           className={`group/btn relative overflow-hidden mt-4 ${viewStyle === 'list' ? 'self-start' : 'w-full'}`}
-          onClick={() => onViewDetails && onViewDetails(property)}
+          onClick={handleViewDetails}
         >
           <span className="relative z-10">
             View Details
