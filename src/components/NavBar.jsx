@@ -19,6 +19,7 @@ export default function NavBar() {
         <nav className="hidden md:flex items-center gap-1 ml-auto">
           <NavLink to="/properties" className={navLinkClass}>Properties</NavLink>
           <NavLink to="/services" className={navLinkClass}>Services</NavLink>
+          <NavLink to="/reviews" className={navLinkClass}>Reviews</NavLink>
           <NavLink to="/login" className={navLinkClass}>Login</NavLink>
         </nav>
         <div className="hidden md:flex items-center gap-2 ml-2">
@@ -62,6 +63,7 @@ export default function NavBar() {
           }`}>
             <NavLink onClick={() => setOpen(false)} to="/properties" className={navLinkClass}>Properties</NavLink>
             <NavLink onClick={() => setOpen(false)} to="/services" className={navLinkClass}>Services</NavLink>
+            <NavLink onClick={() => setOpen(false)} to="/reviews" className={navLinkClass}>Reviews</NavLink>
             <NavLink onClick={() => setOpen(false)} to="/login" className={navLinkClass}>Login</NavLink>
             <div className="flex items-center gap-2 mt-2">
               <ThemeToggle />

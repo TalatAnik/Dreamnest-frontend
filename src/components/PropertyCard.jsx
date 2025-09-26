@@ -17,7 +17,7 @@ export default function PropertyCard({
     }
   };
   // Star rating component
-  const StarRating = ({ rating, totalReviews }) => {
+  const StarRating = ({ rating, totalReviews, clickable = false, onClick }) => {
     if (!rating) return null; // Don't show rating if not available
     
     const stars = [];
@@ -59,7 +59,7 @@ export default function PropertyCard({
       );
     }
 
-    return (
+    const content = (
       <div className="flex items-center gap-1 mt-2">
         <div className="flex items-center gap-0.5">
           {stars}
@@ -69,6 +69,20 @@ export default function PropertyCard({
         </span>
       </div>
     );
+
+    if (clickable && onClick) {
+      return (
+        <button 
+          onClick={onClick}
+          className="transition-all hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md p-1 -m-1"
+          title="View all reviews"
+        >
+          {content}
+        </button>
+      );
+    }
+
+    return content;
   };
 
   return (
@@ -144,7 +158,12 @@ export default function PropertyCard({
           </div>
 
           {/* Star Rating */}
-          <StarRating rating={property.rating} totalReviews={property.totalReviews} />
+          <StarRating 
+            rating={property.rating} 
+            totalReviews={property.totalReviews} 
+            clickable={true}
+            onClick={() => navigate(`/properties/${property.id}/reviews`)}
+          />
         </div>
 
         {/* Action Button */}

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 
 export default function ServiceProviderProfilePage() {
   const { category, providerId } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [provider, setProvider] = useState(null);
 
@@ -128,7 +129,7 @@ export default function ServiceProviderProfilePage() {
     fetchProvider();
   }, [providerId]);
 
-  const StarRating = ({ rating, size = 'sm' }) => {
+  const StarRating = ({ rating, size = 'sm', clickable = false, onClick }) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -166,11 +167,25 @@ export default function ServiceProviderProfilePage() {
       );
     }
 
-    return (
+    const content = (
       <div className="flex items-center gap-0.5">
         {stars}
       </div>
     );
+
+    if (clickable && onClick) {
+      return (
+        <button 
+          onClick={onClick}
+          className="transition-all hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md p-1 -m-1"
+          title="View all reviews"
+        >
+          {content}
+        </button>
+      );
+    }
+
+    return content;
   };
 
   if (loading) {
@@ -286,13 +301,23 @@ export default function ServiceProviderProfilePage() {
             
             <div className="flex items-center gap-4 mb-4">
               <div className="flex items-center gap-2">
-                <StarRating rating={provider.rating} size="lg" />
-                <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {provider.rating}
-                </span>
-                <span className="text-gray-600 dark:text-gray-400">
-                  ({provider.reviewsCount} reviews)
-                </span>
+                <StarRating 
+                  rating={provider.rating} 
+                  size="lg" 
+                  clickable={true}
+                  onClick={() => navigate(`/services/${category}/${providerId}/reviews`)}
+                />
+                <button
+                  onClick={() => navigate(`/services/${category}/${providerId}/reviews`)}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                >
+                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {provider.rating}
+                  </span>
+                  <span className="text-gray-600 dark:text-gray-400 hover:text-primary-600 transition-colors">
+                    ({provider.reviewsCount} reviews)
+                  </span>
+                </button>
               </div>
               <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
                 provider.availability === 'available' 
@@ -314,6 +339,17 @@ export default function ServiceProviderProfilePage() {
               </Link>
               <Button variant="outline" size="lg" className="w-full sm:w-auto">
                 Contact Provider
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="w-full sm:w-auto"
+                onClick={() => navigate(`/services/${category}/${providerId}/reviews`)}
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.414L3 21l2.414-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                </svg>
+                View All Reviews ({provider.reviewsCount})
               </Button>
             </div>
           </div>
@@ -588,6 +624,17 @@ export default function ServiceProviderProfilePage() {
           )}
         </div>
       </Container>
+
+      {/* Floating Write Review Button */}
+      <button
+        onClick={() => navigate(`/reviews/write?provider=${providerId}`)}
+        className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 group z-50"
+        title="Write a Review"
+      >
+        <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </button>
     </div>
   );
 }

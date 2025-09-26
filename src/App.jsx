@@ -11,6 +11,10 @@ import ServiceCategoryPage from './pages/ServiceCategoryPage.jsx';
 import ServiceProviderProfilePage from './pages/ServiceProviderProfilePage.jsx';
 import ServiceBookingFormPage from './pages/ServiceBookingFormPage.jsx';
 import BookingConfirmationPage from './pages/BookingConfirmationPage.jsx';
+import ReviewsOverviewPage from './pages/ReviewsOverviewPage.jsx';
+import PropertyReviewsPage from './pages/PropertyReviewsPage.jsx';
+import ServiceProviderReviewsPage from './pages/ServiceProviderReviewsPage.jsx';
+import WriteReviewPage from './pages/WriteReviewPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
 function App() {
@@ -26,7 +30,11 @@ function App() {
           <Route path="/services/:category" element={<ServiceCategoryPage />} />
           <Route path="/services/:category/:providerId" element={<ServiceProviderProfilePage />} />
           <Route path="/services/:category/:providerId/book" element={<ServiceBookingFormPage />} />
+          <Route path="/services/:category/:providerId/reviews" element={<ServiceProviderReviewsPage />} />
           <Route path="/booking/confirmation/:bookingId" element={<BookingConfirmationPage />} />
+          <Route path="/reviews" element={<ReviewsOverviewPage />} />
+          <Route path="/reviews/write" element={<WriteReviewPage />} />
+          <Route path="/properties/:id/reviews" element={<PropertyReviewsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

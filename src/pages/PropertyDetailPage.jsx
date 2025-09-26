@@ -92,7 +92,7 @@ Located in a premium residential building with 24/7 security, elevator access, a
     fetchProperty();
   }, [id]);
 
-  const StarRating = ({ rating, totalReviews, size = 'sm' }) => {
+  const StarRating = ({ rating, totalReviews, size = 'sm', clickable = false, onClick }) => {
     if (!rating) return null;
     
     const stars = [];
@@ -135,7 +135,7 @@ Located in a premium residential building with 24/7 security, elevator access, a
       );
     }
 
-    return (
+    const content = (
       <div className="flex items-center gap-1">
         <div className="flex items-center gap-0.5">
           {stars}
@@ -147,6 +147,20 @@ Located in a premium residential building with 24/7 security, elevator access, a
         )}
       </div>
     );
+
+    if (clickable && onClick) {
+      return (
+        <button 
+          onClick={onClick}
+          className="transition-all hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md p-1 -m-1"
+          title="View all reviews"
+        >
+          {content}
+        </button>
+      );
+    }
+
+    return content;
   };
 
   const nextImage = () => {
@@ -467,7 +481,12 @@ Located in a premium residential building with 24/7 security, elevator access, a
                     {property.location}
                   </p>
                 </div>
-                <StarRating rating={property.rating} totalReviews={property.totalReviews} />
+                <StarRating 
+                  rating={property.rating} 
+                  totalReviews={property.totalReviews} 
+                  clickable={true}
+                  onClick={() => navigate(`/properties/${property.id}/reviews`)}
+                />
               </div>
 
               {/* Compact Pricing */}
@@ -703,6 +722,18 @@ Located in a premium residential building with 24/7 security, elevator access, a
                     </svg>
                     Save Property
                   </Button>
+                  {property.totalReviews > 0 && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => navigate(`/properties/${property.id}/reviews`)}
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.414L3 21l2.414-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                      </svg>
+                      View All Reviews ({property.totalReviews})
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -814,6 +845,17 @@ Located in a premium residential building with 24/7 security, elevator access, a
           </div>
         </div>
       </Container>
+
+      {/* Floating Write Review Button */}
+      <button
+        onClick={() => navigate(`/reviews/write?property=${property.id}`)}
+        className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 group z-50"
+        title="Write a Review"
+      >
+        <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </button>
     </div>
   );
 }

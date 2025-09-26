@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 
 export default function ServiceCategoryPage() {
   const { category } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [providers, setProviders] = useState([]);
   const [filteredProviders, setFilteredProviders] = useState([]);
@@ -204,7 +205,7 @@ export default function ServiceCategoryPage() {
     setFilteredProviders(filtered);
   }, [providers, sortBy, availabilityFilter, priceRange]);
 
-  const StarRating = ({ rating, size = 'sm' }) => {
+  const StarRating = ({ rating, size = 'sm', clickable = false, onClick }) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -242,11 +243,25 @@ export default function ServiceCategoryPage() {
       );
     }
 
-    return (
+    const content = (
       <div className="flex items-center gap-0.5">
         {stars}
       </div>
     );
+
+    if (clickable && onClick) {
+      return (
+        <button 
+          onClick={onClick}
+          className="transition-all hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md p-1 -m-1"
+          title="View all reviews"
+        >
+          {content}
+        </button>
+      );
+    }
+
+    return content;
   };
 
   const AvailabilityBadge = ({ availability }) => {
@@ -451,10 +466,17 @@ export default function ServiceCategoryPage() {
                   </div>
                   
                   <div className="flex items-center gap-2 mb-3">
-                    <StarRating rating={provider.rating} />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <StarRating 
+                      rating={provider.rating} 
+                      clickable={true}
+                      onClick={() => navigate(`/services/${category}/${provider.id}/reviews`)}
+                    />
+                    <button
+                      onClick={() => navigate(`/services/${category}/${provider.id}/reviews`)}
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 transition-colors"
+                    >
                       {provider.rating} ({provider.reviewsCount} reviews)
-                    </span>
+                    </button>
                   </div>
                   
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
