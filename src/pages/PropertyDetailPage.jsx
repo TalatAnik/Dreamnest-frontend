@@ -849,7 +849,7 @@ Located in a premium residential building with 24/7 security, elevator access, a
       {/* Floating Write Review Button */}
       <button
         onClick={() => navigate(`/reviews/write?property=${property.id}`)}
-        className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 group z-50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-primary-600 hover:bg-primary-700 text-white p-3 sm:p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 group z-50"
         title="Write a Review"
       >
         <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

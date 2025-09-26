@@ -282,71 +282,70 @@ export default function ServiceProviderReviewsPage() {
     <div className="flex flex-col min-h-screen">
       <Container className="flex-1 py-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
-          <Link to="/services" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+        <nav className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 overflow-x-auto">
+          <Link to="/services" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors whitespace-nowrap">
             Services
           </Link>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <Link to={`/services/${provider.category}`} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-            Cleaning Services
+          <Link to={`/services/${provider.category}`} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors whitespace-nowrap">
+            <span className="hidden sm:inline">Cleaning Services</span>
+            <span className="sm:hidden">Cleaning</span>
           </Link>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <Link to={`/services/${provider.category}/${providerId}`} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+          <Link to={`/services/${provider.category}/${providerId}`} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors whitespace-nowrap truncate max-w-20 sm:max-w-none">
             {provider.name}
           </Link>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-gray-900 dark:text-white font-medium">
+          <span className="text-gray-900 dark:text-white font-medium whitespace-nowrap">
             Reviews
           </span>
         </nav>
 
         {/* Provider Header */}
-        <div className="flex items-start gap-6 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 mb-8">
           <img
             src={provider.image}
             alt={provider.name}
-            className="w-24 h-24 rounded-2xl object-cover"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover mx-auto sm:mx-0"
           />
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="flex-1 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mb-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                 Reviews for {provider.name}
               </h1>
               {provider.verified && (
-                <span className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-sm px-3 py-1 rounded-full flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full flex items-center gap-1">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Verified Provider
+                  <span className="hidden sm:inline">Verified Provider</span>
+                  <span className="sm:hidden">Verified</span>
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4 mb-4">
               <div className="flex items-center gap-2">
                 <StarRating rating={provider.rating} size="lg" />
-                <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                <span className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   {provider.rating}
                 </span>
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   ({provider.totalReviews} reviews)
                 </span>
               </div>
-              <span className="text-gray-500">•</span>
-              <span className="text-gray-600 dark:text-gray-400">
-                {provider.completedJobs} jobs completed
-              </span>
-              <span className="text-gray-500">•</span>
-              <span className="text-gray-600 dark:text-gray-400">
-                Response: {provider.responseTime}
-              </span>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                <span>{provider.completedJobs} jobs</span>
+                <span className="hidden sm:inline text-gray-500">•</span>
+                <span className="hidden sm:inline">Response: {provider.responseTime}</span>
+              </div>
             </div>
-            <Button onClick={() => setShowReviewForm(true)}>
+            <Button onClick={() => setShowReviewForm(true)} className="w-full sm:w-auto">
               Write Review
             </Button>
           </div>

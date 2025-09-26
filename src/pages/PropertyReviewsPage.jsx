@@ -283,56 +283,56 @@ export default function PropertyReviewsPage() {
     <div className="flex flex-col min-h-screen">
       <Container className="flex-1 py-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
-          <Link to="/properties" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+        <nav className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 overflow-x-auto">
+          <Link to="/properties" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors whitespace-nowrap">
             Properties
           </Link>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <Link to={`/properties/${id}`} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+          <Link to={`/properties/${id}`} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors whitespace-nowrap truncate max-w-24 sm:max-w-none">
             {property.title}
           </Link>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-gray-900 dark:text-white font-medium">
+          <span className="text-gray-900 dark:text-white font-medium whitespace-nowrap">
             Reviews
           </span>
         </nav>
 
         {/* Property Header */}
-        <div className="flex items-start gap-6 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 mb-8">
           <img
             src={property.image}
             alt={property.title}
-            className="w-24 h-24 rounded-2xl object-cover"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover mx-auto sm:mx-0"
           />
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Reviews for {property.title}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4">
               {property.location} • {property.type} • ৳{property.price.toLocaleString()}/month
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
                 <StarRating rating={property.overallRating} size="lg" />
-                <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                <span className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   {property.overallRating}
                 </span>
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   ({property.totalReviews} reviews)
                 </span>
               </div>
-              <Button onClick={() => setShowReviewForm(true)}>
+              <Button onClick={() => setShowReviewForm(true)} className="w-full sm:w-auto">
                 Write Review
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
           {/* Reviews List */}
           <div className="lg:col-span-2">
             {/* Review Form */}

@@ -277,12 +277,12 @@ export default function ServiceProviderProfilePage() {
         </div>
 
         {/* Profile Header */}
-        <div className="flex flex-col md:flex-row items-start gap-6 mb-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8">
           <div className="relative">
             <img
               src={provider.image}
               alt={provider.name}
-              className="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg"
             />
             {provider.verified && (
               <div className="absolute -bottom-2 -right-2 bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
@@ -294,12 +294,12 @@ export default function ServiceProviderProfilePage() {
             )}
           </div>
           
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
               {provider.name}
             </h1>
             
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4 mb-4">
               <div className="flex items-center gap-2">
                 <StarRating 
                   rating={provider.rating} 
@@ -311,10 +311,10 @@ export default function ServiceProviderProfilePage() {
                   onClick={() => navigate(`/services/${category}/${providerId}/reviews`)}
                   className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                     {provider.rating}
                   </span>
-                  <span className="text-gray-600 dark:text-gray-400 hover:text-primary-600 transition-colors">
+                  <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 hover:text-primary-600 transition-colors">
                     ({provider.reviewsCount} reviews)
                   </span>
                 </button>
@@ -331,25 +331,26 @@ export default function ServiceProviderProfilePage() {
               </span>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to={`/services/${category}/${providerId}/book`}>
-                <Button size="lg" className="w-full sm:w-auto">
+            <div className="flex flex-col gap-3 w-full sm:w-auto">
+              <Link to={`/services/${category}/${providerId}/book`} className="w-full">
+                <Button size="lg" className="w-full">
                   Book Service
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full">
                 Contact Provider
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="w-full sm:w-auto"
+                className="w-full"
                 onClick={() => navigate(`/services/${category}/${providerId}/reviews`)}
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.414L3 21l2.414-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.414L3 21l2.414-5.094A8.959 8.959 0 113 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
                 </svg>
-                View All Reviews ({provider.reviewsCount})
+                <span className="hidden sm:inline">View All Reviews ({provider.reviewsCount})</span>
+                <span className="sm:hidden">Reviews ({provider.reviewsCount})</span>
               </Button>
             </div>
           </div>
@@ -628,7 +629,7 @@ export default function ServiceProviderProfilePage() {
       {/* Floating Write Review Button */}
       <button
         onClick={() => navigate(`/reviews/write?provider=${providerId}`)}
-        className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 group z-50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-primary-600 hover:bg-primary-700 text-white p-3 sm:p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 group z-50"
         title="Write a Review"
       >
         <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
