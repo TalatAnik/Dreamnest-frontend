@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import Button from './Button.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 
 const linkBase = 'text-sm font-medium px-3 py-2 rounded-md transition-colors';
 const navLinkClass = ({ isActive }) =>
@@ -21,6 +22,7 @@ export default function NavBar() {
           <NavLink to="/login" className={navLinkClass}>Login</NavLink>
         </nav>
         <div className="hidden md:flex items-center gap-2 ml-2">
+          <ThemeToggle />
           <Button
             size="sm"
             variant="primary"
@@ -61,13 +63,16 @@ export default function NavBar() {
             <NavLink onClick={() => setOpen(false)} to="/properties" className={navLinkClass}>Properties</NavLink>
             <NavLink onClick={() => setOpen(false)} to="/services" className={navLinkClass}>Services</NavLink>
             <NavLink onClick={() => setOpen(false)} to="/login" className={navLinkClass}>Login</NavLink>
-            <Button
-              size="sm"
-              variant="primary"
-              className="mt-2"
-              onClick={() => { setOpen(false); alert('Listing flow coming in a later phase.'); }}>
-              List Property
-            </Button>
+            <div className="flex items-center gap-2 mt-2">
+              <ThemeToggle />
+              <Button
+                size="sm"
+                variant="primary"
+                className="flex-1"
+                onClick={() => { setOpen(false); alert('Listing flow coming in a later phase.'); }}>
+                List Property
+              </Button>
+            </div>
           </div>
         </div>
       </div>
