@@ -37,7 +37,7 @@ export default function NavBar() {
         return '/dashboard/provider';
       case 'renter':
       default:
-        return '/dashboard';
+        return '/dashboard/renter';
     }
   };
 

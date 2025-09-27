@@ -9,13 +9,13 @@ const UnauthorizedPage = () => {
     // Redirect to appropriate dashboard based on user role
     switch (user?.role) {
       case 'admin':
-        return '/admin-dashboard';
+        return '/admin/dashboard';
       case 'owner':
-        return '/owner-dashboard';
+        return '/dashboard/owner';
       case 'service_provider':
-        return '/provider-dashboard';
+        return '/dashboard/provider';
       case 'renter':
-        return '/renter-dashboard';
+        return '/dashboard/renter';
       default:
         return '/';
     }

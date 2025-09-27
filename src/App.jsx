@@ -2,6 +2,14 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import ProtectedRoute, { 
+  AdminOnlyRoute, 
+  OwnerOnlyRoute, 
+  ProviderOnlyRoute, 
+  RenterOnlyRoute,
+  AuthenticatedRoute
+} from './components/ProtectedRoute.jsx';
+import SmartDashboardRedirect from './components/SmartDashboardRedirect.jsx';
 import RootLayout from './layout/RootLayout.jsx';
 import HomePage from './pages/HomePage.jsx';
 import PropertiesPage from './pages/PropertiesPage.jsx';
@@ -35,29 +43,119 @@ function App() {
       <AuthProvider>
         <Routes>
         <Route element={<RootLayout />}> 
+          {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/dashboard/owner" element={<OwnerDashboardPage />} />
-          <Route path="/dashboard/provider" element={<ServiceProviderDashboardPage />} />
-          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/profile/renter" element={<RenterProfilePage />} />
-          <Route path="/profile/owner" element={<OwnerProfilePage />} />
-          <Route path="/profile/provider" element={<ProviderProfilePage />} />
           <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/properties/:id" element={<PropertyDetailPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/services/:category" element={<ServiceCategoryPage />} />
           <Route path="/services/:category/:providerId" element={<ServiceProviderProfilePage />} />
-          <Route path="/services/:category/:providerId/book" element={<ServiceBookingFormPage />} />
-          <Route path="/services/:category/:providerId/reviews" element={<ServiceProviderReviewsPage />} />
-          <Route path="/booking/confirmation/:bookingId" element={<BookingConfirmationPage />} />
-          <Route path="/reviews" element={<ReviewsOverviewPage />} />
-          <Route path="/reviews/write" element={<WriteReviewPage />} />
           <Route path="/properties/:id/reviews" element={<PropertyReviewsPage />} />
+          <Route path="/services/:category/:providerId/reviews" element={<ServiceProviderReviewsPage />} />
+          <Route path="/reviews" element={<ReviewsOverviewPage />} />
+          
+          {/* Protected Routes - Require Authentication */}
+          <Route 
+            path="/dashboard" 
+            element={<SmartDashboardRedirect />} 
+          />
+          <Route 
+            path="/dashboard/renter" 
+            element={
+              <RenterOnlyRoute>
+                <DashboardPage />
+              </RenterOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard/owner" 
+            element={
+              <OwnerOnlyRoute>
+                <OwnerDashboardPage />
+              </OwnerOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard/provider" 
+            element={
+              <ProviderOnlyRoute>
+                <ServiceProviderDashboardPage />
+              </ProviderOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <AdminOnlyRoute>
+                <AdminDashboardPage />
+              </AdminOnlyRoute>
+            } 
+          />
+          
+          {/* Profile Routes - Role-specific */}
+          <Route 
+            path="/profile" 
+            element={
+              <AuthenticatedRoute>
+                <ProfilePage />
+              </AuthenticatedRoute>
+            } 
+          />
+          <Route 
+            path="/profile/renter" 
+            element={
+              <RenterOnlyRoute>
+                <RenterProfilePage />
+              </RenterOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/profile/owner" 
+            element={
+              <OwnerOnlyRoute>
+                <OwnerProfilePage />
+              </OwnerOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/profile/provider" 
+            element={
+              <ProviderOnlyRoute>
+                <ProviderProfilePage />
+              </ProviderOnlyRoute>
+            } 
+          />
+          
+          {/* Booking and Review Routes - Require Authentication */}
+          <Route 
+            path="/services/:category/:providerId/book" 
+            element={
+              <AuthenticatedRoute>
+                <ServiceBookingFormPage />
+              </AuthenticatedRoute>
+            } 
+          />
+          <Route 
+            path="/booking/confirmation/:bookingId" 
+            element={
+              <AuthenticatedRoute>
+                <BookingConfirmationPage />
+              </AuthenticatedRoute>
+            } 
+          />
+          <Route 
+            path="/reviews/write" 
+            element={
+              <AuthenticatedRoute>
+                <WriteReviewPage />
+              </AuthenticatedRoute>
+            } 
+          />
+          
+          {/* System Routes */}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
