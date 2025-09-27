@@ -32,6 +32,7 @@ import OwnerDashboardPage from './pages/OwnerDashboardPage.jsx';
 import ServiceProviderDashboardPage from './pages/ServiceProviderDashboardPage.jsx';
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 import AdminUserManagementPage from './pages/AdminUserManagementPage.jsx';
+import AdminPropertyManagementPage from './pages/AdminPropertyManagementPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import RenterProfilePage from './pages/RenterProfilePage.jsx';
 import OwnerProfilePage from './pages/OwnerProfilePage.jsx';
@@ -102,6 +103,14 @@ function App() {
             element={
               <AdminOnlyRoute>
                 <AdminUserManagementPage />
+              </AdminOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/admin/properties" 
+            element={
+              <AdminOnlyRoute>
+                <AdminPropertyManagementPage />
               </AdminOnlyRoute>
             } 
           />
