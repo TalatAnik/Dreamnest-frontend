@@ -39,6 +39,10 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import RenterProfilePage from './pages/RenterProfilePage.jsx';
 import OwnerProfilePage from './pages/OwnerProfilePage.jsx';
 import ProviderProfilePage from './pages/ProviderProfilePage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
+import ContactPage from './pages/ContactPage.jsx';
+import FAQPage from './pages/FAQPage.jsx';
+import HelpPage from './pages/HelpPage.jsx';
 import UnauthorizedPage from './pages/UnauthorizedPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
@@ -192,6 +196,12 @@ function App() {
               </AuthenticatedRoute>
             } 
           />
+          
+          {/* Information & Support Routes */}
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/help" element={<HelpPage />} />
           
           {/* System Routes */}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
