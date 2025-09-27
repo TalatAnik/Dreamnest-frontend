@@ -43,6 +43,9 @@ import AboutPage from './pages/AboutPage.jsx';
 import ContactPage from './pages/ContactPage.jsx';
 import FAQPage from './pages/FAQPage.jsx';
 import HelpPage from './pages/HelpPage.jsx';
+import PrivacyPage from './pages/PrivacyPage.jsx';
+import TermsPage from './pages/TermsPage.jsx';
+import CookiePage from './pages/CookiePage.jsx';
 import UnauthorizedPage from './pages/UnauthorizedPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
@@ -202,6 +205,11 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/help" element={<HelpPage />} />
+          
+          {/* Legal & Compliance Routes */}
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/cookies" element={<CookiePage />} />
           
           {/* System Routes */}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
