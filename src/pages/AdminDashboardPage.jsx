@@ -258,6 +258,21 @@ const AdminDashboardPage = () => {
                 </Link>
 
                 <Link
+                  to="/admin/providers"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6M8 8v6a2 2 0 002 2h4a2 2 0 002-2V8M8 8V6a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">Service Provider Management</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">Verify and monitor providers</div>
+                  </div>
+                </Link>
+
+                <Link
                   to="/admin/reviews"
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
