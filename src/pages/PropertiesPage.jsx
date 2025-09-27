@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 import SectionHeading from '../components/SectionHeading.jsx';
 import PropertyCard from '../components/PropertyCard.jsx';
 
 export default function PropertiesPage() {
+  const { user } = useAuth();
   const [filters, setFilters] = useState({
     search: '',
     location: '',
@@ -58,10 +60,38 @@ export default function PropertiesPage() {
         <Container className="py-12 md:py-16">
           <div className="text-center mb-8">
             <SectionHeading 
-              title="Find Your Perfect Property"
-              subtitle="Discover amazing properties in prime locations across Bangladesh"
+              title={
+                user && user.role === 'owner' 
+                  ? "Property Portfolio Management"
+                  : user && user.role === 'admin'
+                    ? "Property Administration Dashboard"
+                    : "Find Your Perfect Property"
+              }
+              subtitle={
+                user && user.role === 'owner'
+                  ? "Manage your property listings and track performance across all locations"
+                  : user && user.role === 'admin'
+                    ? "Monitor and manage all properties in the platform"
+                    : `Discover amazing properties in prime locations across Bangladesh${user ? ` - Welcome back, ${user.name || user.email?.split('@')[0]}!` : ''}`
+              }
               align="center"
             />
+            {user && user.role === 'owner' && (
+              <div className="mt-4">
+                <Button variant="primary" className="mr-3">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add New Property
+                </Button>
+                <Button variant="outline">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  View Analytics
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Enhanced Search Bar - Full Width */}

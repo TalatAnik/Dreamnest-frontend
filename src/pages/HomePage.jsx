@@ -1,10 +1,29 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container.jsx';
 import SectionHeading from '../components/SectionHeading.jsx';
 import Button from '../components/Button.jsx';
 
 export default function HomePage() {
+  const { user } = useAuth();
+
+  const getDashboardPath = () => {
+    if (!user) return '/dashboard';
+    
+    switch (user.role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'owner':
+        return '/dashboard/owner';
+      case 'service_provider':
+        return '/dashboard/provider';
+      case 'renter':
+      default:
+        return '/dashboard/renter';
+    }
+  };
+
   const features = [
   { title: 'Verified Listings', tone:'primary', accent:'from-primary-500/15 to-primary-500/0', icon: (
         <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary-600 dark:text-primary-400"><path fill="currentColor" d="M9.55 17.54 4.4 12.4l1.42-1.42 3.73 3.73 8.63-8.63 1.42 1.42Z"/></svg>
@@ -40,12 +59,35 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/45 to-black/25 dark:from-black/70 dark:via-black/55 dark:to-black/35" />
         </div>
         <Container className="py-16 sm:py-20 md:py-32 text-center relative w-full">
+          {/* Personalized Welcome Message */}
+          {user && (
+            <div className="mb-4 sm:mb-6">
+              <p className="text-white/80 text-lg">
+                Welcome back, <span className="font-semibold text-white">{user.name || user.email?.split('@')[0]}</span>!
+              </p>
+            </div>
+          )}
+          
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6 text-white drop-shadow-lg leading-tight">
-            Find Your Next Home<br className="hidden sm:block" />
+            {user 
+              ? (user.role === 'owner' 
+                  ? 'Manage Your Properties' 
+                  : user.role === 'service_provider' 
+                    ? 'Grow Your Business' 
+                    : 'Find Your Next Home')
+              : 'Find Your Next Home'
+            }<br className="hidden sm:block" />
             <span className="sm:hidden"> </span>with Confidence
           </h1>
           <p className="max-w-xl sm:max-w-2xl mx-auto mb-6 sm:mb-8 text-base sm:text-lg md:text-xl text-white/90 leading-relaxed px-4 sm:px-0">
-            Search properties, explore reviews, plan services & prepare for future AI insights — all in one modern interface.
+            {user 
+              ? (user.role === 'owner' 
+                  ? 'Track your listings, manage tenant relationships, and grow your real estate portfolio with powerful tools.'
+                  : user.role === 'service_provider' 
+                    ? 'Connect with property owners and renters, showcase your services, and build your client base.'
+                    : 'Search properties, explore reviews, plan services & prepare for future AI insights — all in one modern interface.')
+              : 'Search properties, explore reviews, plan services & prepare for future AI insights — all in one modern interface.'
+            }
           </p>
           
           {/* Modern Mobile-First Search Bar */}
@@ -96,44 +138,96 @@ export default function HomePage() {
             </div>
           </div>
           
-          {/* Mobile-Friendly Action Buttons */}
+          {/* Role-Based Action Buttons */}
           <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-3 sm:gap-4 px-4 sm:px-0">
-            <Button 
-              as={Link} 
-              to="/properties" 
-              variant="primary" 
-              size="lg"
-              className="w-full sm:w-auto shadow-xl bg-primary-600 hover:bg-primary-700 text-white border-0"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              Explore Properties
-            </Button>
-            <Button 
-              as={Link} 
-              to="/services" 
-              variant="secondary" 
-              size="lg"
-              className="w-full sm:w-auto shadow-xl bg-white/95 hover:bg-white text-gray-800 hover:text-gray-900 border border-white/60"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
-              View Services
-            </Button>
-            <Button 
-              as={Link} 
-              to="/register" 
-              variant="outline" 
-              size="lg"
-              className="w-full sm:w-auto shadow-xl bg-transparent hover:bg-white/20 border-2 border-white/80 text-white hover:text-white hover:border-white"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              Create Account
-            </Button>
+            {user ? (
+              // Authenticated user actions
+              <>
+                <Button 
+                  as={Link} 
+                  to={getDashboardPath()} 
+                  variant="primary" 
+                  size="lg"
+                  className="w-full sm:w-auto shadow-xl bg-primary-600 hover:bg-primary-700 text-white border-0"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  {user.role === 'admin' ? 'Admin Dashboard' : 
+                   user.role === 'owner' ? 'Manage Properties' :
+                   user.role === 'service_provider' ? 'Provider Dashboard' : 
+                   'My Dashboard'}
+                </Button>
+                
+                <Button 
+                  as={Link} 
+                  to="/properties" 
+                  variant="secondary" 
+                  size="lg"
+                  className="w-full sm:w-auto shadow-xl bg-white/95 hover:bg-white text-gray-800 hover:text-gray-900 border border-white/60"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  {user.role === 'owner' ? 'View All Properties' : 'Browse Properties'}
+                </Button>
+
+                {user.role !== 'admin' && (
+                  <Button 
+                    as={Link} 
+                    to="/services" 
+                    variant="outline" 
+                    size="lg"
+                    className="w-full sm:w-auto shadow-xl bg-transparent hover:bg-white/20 border-2 border-white/80 text-white hover:text-white hover:border-white"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                    {user.role === 'service_provider' ? 'Manage Services' : 'Find Services'}
+                  </Button>
+                )}
+              </>
+            ) : (
+              // Guest user actions
+              <>
+                <Button 
+                  as={Link} 
+                  to="/properties" 
+                  variant="primary" 
+                  size="lg"
+                  className="w-full sm:w-auto shadow-xl bg-primary-600 hover:bg-primary-700 text-white border-0"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Explore Properties
+                </Button>
+                <Button 
+                  as={Link} 
+                  to="/services" 
+                  variant="secondary" 
+                  size="lg"
+                  className="w-full sm:w-auto shadow-xl bg-white/95 hover:bg-white text-gray-800 hover:text-gray-900 border border-white/60"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  </svg>
+                  View Services
+                </Button>
+                <Button 
+                  as={Link} 
+                  to="/register" 
+                  variant="outline" 
+                  size="lg"
+                  className="w-full sm:w-auto shadow-xl bg-transparent hover:bg-white/20 border-2 border-white/80 text-white hover:text-white hover:border-white"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  Create Account
+                </Button>
+              </>
+            )}
           </div>
         </Container>
       </div>

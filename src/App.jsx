@@ -26,6 +26,7 @@ import ServiceProviderReviewsPage from './pages/ServiceProviderReviewsPage.jsx';
 import WriteReviewPage from './pages/WriteReviewPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
+import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import OwnerDashboardPage from './pages/OwnerDashboardPage.jsx';
 import ServiceProviderDashboardPage from './pages/ServiceProviderDashboardPage.jsx';

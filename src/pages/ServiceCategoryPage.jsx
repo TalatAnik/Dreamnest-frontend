@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 
 export default function ServiceCategoryPage() {
   const { category } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [providers, setProviders] = useState([]);
   const [filteredProviders, setFilteredProviders] = useState([]);
@@ -530,9 +532,31 @@ export default function ServiceCategoryPage() {
                         View Profile
                       </Button>
                     </Link>
-                    <Button variant="outline" size="sm">
-                      Contact
-                    </Button>
+                    
+                    {/* Role-based action button */}
+                    {user && user.role === 'service_provider' ? (
+                      <Button variant="outline" size="sm" disabled>
+                        Colleague
+                      </Button>
+                    ) : isAuthenticated ? (
+                      <Button variant="outline" size="sm">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        Contact
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => navigate('/login')}
+                      >
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        Sign In
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

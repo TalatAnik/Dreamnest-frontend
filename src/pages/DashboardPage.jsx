@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container';
 import Button from '../components/Button';
 import PropertyCard from '../components/PropertyCard';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
 
   // Mock data for saved properties
   const savedProperties = [
@@ -110,35 +111,25 @@ const DashboardPage = () => {
   ];
 
   useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem('user');
-    if (!userData) {
-      navigate('/login');
-      return;
+    // Redirect to appropriate dashboard based on role if not renter
+    if (user && user.role !== 'renter') {
+      if (user.role === 'owner') {
+        navigate('/dashboard/owner');
+      } else if (user.role === 'service_provider') {
+        navigate('/dashboard/provider');
+      } else if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      }
     }
+  }, [user, navigate]);
 
-    const parsedUser = JSON.parse(userData);
-    
-    // Redirect to appropriate dashboard based on role
-    if (parsedUser.role === 'owner') {
-      navigate('/dashboard/owner');
-      return;
-    } else if (parsedUser.role === 'service_provider') {
-      navigate('/dashboard/provider');
-      return;
-    } else if (parsedUser.role === 'admin') {
-      navigate('/admin/dashboard');
-      return;
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
-
-    // This is the renter dashboard
-    setUser(parsedUser);
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('userToken');
-    navigate('/');
   };
 
   const handleRemoveSaved = (propertyId) => {
@@ -160,21 +151,35 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <Container>
-        {/* Header */}
+        {/* Personalized Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Welcome back, {user.name}!
+              Welcome back, {user?.name || user?.email?.split('@')[0] || 'User'}!
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Your Renter Dashboard
+              Your Renter Dashboard - {user?.email}
             </p>
+            {user && (
+              <div className="mt-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
+                  <span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-1.5"></span>
+                  Renter Account
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate('/profile')}>
+            <Button variant="outline" onClick={() => navigate('/profile/renter')}>
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
               Profile
             </Button>
             <Button variant="outline" onClick={handleLogout}>
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
               Sign Out
             </Button>
           </div>
