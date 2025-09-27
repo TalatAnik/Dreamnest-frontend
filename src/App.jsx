@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import { AuthProvider } from './contexts/AuthContext.jsx';
 import RootLayout from './layout/RootLayout.jsx';
 import HomePage from './pages/HomePage.jsx';
 import PropertiesPage from './pages/PropertiesPage.jsx';
@@ -25,12 +26,14 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import RenterProfilePage from './pages/RenterProfilePage.jsx';
 import OwnerProfilePage from './pages/OwnerProfilePage.jsx';
 import ProviderProfilePage from './pages/ProviderProfilePage.jsx';
+import UnauthorizedPage from './pages/UnauthorizedPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
 function App() {
   return (
     <ThemeProvider>
-      <Routes>
+      <AuthProvider>
+        <Routes>
         <Route element={<RootLayout />}> 
           <Route path="/" element={<HomePage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -55,9 +58,11 @@ function App() {
           <Route path="/reviews" element={<ReviewsOverviewPage />} />
           <Route path="/reviews/write" element={<WriteReviewPage />} />
           <Route path="/properties/:id/reviews" element={<PropertyReviewsPage />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

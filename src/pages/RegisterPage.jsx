@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container';
 import Button from '../components/Button';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState('');
   const [formData, setFormData] = useState({
@@ -181,19 +183,52 @@ const RegisterPage = () => {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Use AuthContext register method
+      const userData = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+        role: userType,
+        phone: formData.phone,
+        // Include role-specific data
+        ...(userType === 'owner' && {
+          businessName: formData.businessName,
+          businessType: formData.businessType,
+          taxId: formData.taxId
+        }),
+        ...(userType === 'service_provider' && {
+          companyName: formData.companyName,
+          serviceCategories: formData.serviceCategories,
+          experience: formData.experience,
+          businessDescription: formData.businessDescription
+        }),
+        ...(userType === 'renter' && {
+          preferences: formData.preferences
+        })
+      };
+
+      const user = await register(userData);
       
-      // In real implementation, this would create the user account
-      console.log('Registration data:', {
-        userType,
-        ...formData
-      });
-      
-      // Redirect to appropriate dashboard or login
-      navigate('/login?registered=true');
+      // Redirect to appropriate dashboard based on role
+      switch (user.role) {
+        case 'renter':
+          navigate('/dashboard');
+          break;
+        case 'owner':
+          navigate('/dashboard/owner');
+          break;
+        case 'service_provider':
+          navigate('/dashboard/provider');
+          break;
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        default:
+          navigate('/dashboard');
+      }
     } catch (error) {
       console.error('Registration failed:', error);
+      setErrors({ general: error.message || 'Registration failed. Please try again.' });
     } finally {
       setLoading(false);
     }

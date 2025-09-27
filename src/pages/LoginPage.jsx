@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container';
 import Button from '../components/Button';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,50 +22,6 @@ const LoginPage = () => {
   // Check for registration success message
   const searchParams = new URLSearchParams(location.search);
   const isRegistered = searchParams.get('registered') === 'true';
-
-  // Mock user database for demonstration
-  const mockUsers = [
-    {
-      id: 1,
-      email: 'renter@dreamnest.com',
-      password: 'password123',
-      role: 'renter',
-      name: 'Ahmed Rahman',
-      verified: true
-    },
-    {
-      id: 2,
-      email: 'owner@dreamnest.com',
-      password: 'password123',
-      role: 'owner',
-      name: 'Fatima Khan',
-      verified: true,
-      businessName: 'Khan Properties'
-    },
-    {
-      id: 3,
-      email: 'provider@dreamnest.com',
-      password: 'password123',
-      role: 'service_provider',
-      name: 'Mohammad Ali',
-      verified: true,
-      companyName: 'CleanPro Services'
-    },
-    {
-      id: 4,
-      email: 'admin@dreamnest.com',
-      password: 'admin123',
-      role: 'admin',
-      name: 'Admin User',
-      verified: true
-    }
-  ];
-
-  useEffect(() => {
-    // Clear any existing user session on mount
-    localStorage.removeItem('user');
-    localStorage.removeItem('userToken');
-  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -102,37 +60,14 @@ const LoginPage = () => {
     if (!validateForm()) return;
 
     setLoading(true);
+    setErrors({});
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Mock authentication
-      const user = mockUsers.find(
-        u => u.email === formData.email && u.password === formData.password
-      );
-
-      if (!user) {
-        setErrors({ 
-          general: 'Invalid email or password. Please try again.' 
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Simulate storing user data and token
-      const userData = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        verified: user.verified,
-        ...(user.businessName && { businessName: user.businessName }),
-        ...(user.companyName && { companyName: user.companyName })
-      };
-
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userToken', 'mock-jwt-token-' + user.id);
+      // Use AuthContext login method
+      const user = await login({
+        email: formData.email,
+        password: formData.password
+      });
 
       // Role-based dashboard redirection
       switch (user.role) {
@@ -154,7 +89,7 @@ const LoginPage = () => {
     } catch (error) {
       console.error('Login failed:', error);
       setErrors({
-        general: 'Login failed. Please try again.'
+        general: error.message || 'Login failed. Please try again.'
       });
     } finally {
       setLoading(false);
@@ -175,28 +110,38 @@ const LoginPage = () => {
     alert(`${provider} login will be implemented with backend integration`);
   };
 
-  const renderDemoCredentials = () => (
-    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
-      <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-3">
-        Demo Accounts (for testing):
-      </h4>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        {mockUsers.map((user) => (
-          <div key={user.id} className="bg-white dark:bg-blue-900/30 rounded p-2">
-            <div className="font-medium text-blue-900 dark:text-blue-100 capitalize">
-              {user.role.replace('_', ' ')}
+  const renderDemoCredentials = () => {
+    // Demo accounts from AuthContext
+    const demoUsers = [
+      { role: 'renter', email: 'renter@dreamnest.com', password: 'password123' },
+      { role: 'owner', email: 'owner@dreamnest.com', password: 'password123' },
+      { role: 'service_provider', email: 'provider@dreamnest.com', password: 'password123' },
+      { role: 'admin', email: 'admin@dreamnest.com', password: 'admin123' }
+    ];
+
+    return (
+      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
+        <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-3">
+          Demo Accounts (for testing):
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          {demoUsers.map((user) => (
+            <div key={user.role} className="bg-white dark:bg-blue-900/30 rounded p-2">
+              <div className="font-medium text-blue-900 dark:text-blue-100 capitalize">
+                {user.role.replace('_', ' ')}
+              </div>
+              <div className="text-blue-700 dark:text-blue-200 mt-1">
+                {user.email}
+              </div>
+              <div className="text-blue-600 dark:text-blue-300">
+                {user.password}
+              </div>
             </div>
-            <div className="text-blue-700 dark:text-blue-200 mt-1">
-              {user.email}
-            </div>
-            <div className="text-blue-600 dark:text-blue-300">
-              {user.role === 'admin' ? 'admin123' : 'password123'}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (showForgotPassword) {
     return (
