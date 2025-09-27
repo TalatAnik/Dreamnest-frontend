@@ -34,6 +34,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 import AdminUserManagementPage from './pages/AdminUserManagementPage.jsx';
 import AdminPropertyManagementPage from './pages/AdminPropertyManagementPage.jsx';
 import AdminProviderManagementPage from './pages/AdminProviderManagementPage.jsx';
+import AdminReviewModerationPage from './pages/AdminReviewModerationPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import RenterProfilePage from './pages/RenterProfilePage.jsx';
 import OwnerProfilePage from './pages/OwnerProfilePage.jsx';
@@ -120,6 +121,14 @@ function App() {
             element={
               <AdminOnlyRoute>
                 <AdminProviderManagementPage />
+              </AdminOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/admin/reviews" 
+            element={
+              <AdminOnlyRoute>
+                <AdminReviewModerationPage />
               </AdminOnlyRoute>
             } 
           />
