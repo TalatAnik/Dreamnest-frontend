@@ -15,6 +15,16 @@ import ReviewsOverviewPage from './pages/ReviewsOverviewPage.jsx';
 import PropertyReviewsPage from './pages/PropertyReviewsPage.jsx';
 import ServiceProviderReviewsPage from './pages/ServiceProviderReviewsPage.jsx';
 import WriteReviewPage from './pages/WriteReviewPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
+import OwnerDashboardPage from './pages/OwnerDashboardPage.jsx';
+import ServiceProviderDashboardPage from './pages/ServiceProviderDashboardPage.jsx';
+import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import RenterProfilePage from './pages/RenterProfilePage.jsx';
+import OwnerProfilePage from './pages/OwnerProfilePage.jsx';
+import ProviderProfilePage from './pages/ProviderProfilePage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
 function App() {
@@ -23,6 +33,16 @@ function App() {
       <Routes>
         <Route element={<RootLayout />}> 
           <Route path="/" element={<HomePage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/owner" element={<OwnerDashboardPage />} />
+          <Route path="/dashboard/provider" element={<ServiceProviderDashboardPage />} />
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/renter" element={<RenterProfilePage />} />
+          <Route path="/profile/owner" element={<OwnerProfilePage />} />
+          <Route path="/profile/provider" element={<ProviderProfilePage />} />
           <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/properties/:id" element={<PropertyDetailPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
