@@ -1,6 +1,6 @@
 # DreamNest Frontend (Mock Phase)
 
-This is the mock frontend implementation for DreamNest. It uses React (Vite) + Tailwind CSS and serves as a UI prototype. All data & interactions are presently static or simulated.
+This is the mock frontend implementation for DreamNest. It uses React React React (Vite) + Tailwind CSS and serves as a UI prototype. All data & interactions are presently static or simulated.
 
 ## Stack
 - React 18 + Vite
