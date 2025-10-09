@@ -34,10 +34,18 @@ import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 import AdminUserManagementPage from './pages/AdminUserManagementPage.jsx';
 import AdminPropertyManagementPage from './pages/AdminPropertyManagementPage.jsx';
 import AdminProviderManagementPage from './pages/AdminProviderManagementPage.jsx';
+import AdminReviewModerationPage from './pages/AdminReviewModerationPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import RenterProfilePage from './pages/RenterProfilePage.jsx';
 import OwnerProfilePage from './pages/OwnerProfilePage.jsx';
 import ProviderProfilePage from './pages/ProviderProfilePage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
+import ContactPage from './pages/ContactPage.jsx';
+import FAQPage from './pages/FAQPage.jsx';
+import HelpPage from './pages/HelpPage.jsx';
+import PrivacyPage from './pages/PrivacyPage.jsx';
+import TermsPage from './pages/TermsPage.jsx';
+import CookiePage from './pages/CookiePage.jsx';
 import UnauthorizedPage from './pages/UnauthorizedPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
@@ -123,6 +131,14 @@ function App() {
               </AdminOnlyRoute>
             } 
           />
+          <Route 
+            path="/admin/reviews" 
+            element={
+              <AdminOnlyRoute>
+                <AdminReviewModerationPage />
+              </AdminOnlyRoute>
+            } 
+          />
           
           {/* Profile Routes - Role-specific */}
           <Route 
@@ -183,6 +199,17 @@ function App() {
               </AuthenticatedRoute>
             } 
           />
+          
+          {/* Information & Support Routes */}
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          
+          {/* Legal & Compliance Routes */}
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/cookies" element={<CookiePage />} />
           
           {/* System Routes */}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />

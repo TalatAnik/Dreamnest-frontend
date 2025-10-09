@@ -19,7 +19,7 @@ export default function Footer() {
       links: [
         { label: 'About', to: '/about' },
         { label: 'Careers (Mock)', to: '/careers' },
-        { label: 'Blog (Mock)', to: '/blog' },
+        { label: 'Cookie Policy', to: '/cookies' },
         { label: 'Contact', to: '/contact' }
       ]
     },
