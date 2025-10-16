@@ -3,12 +3,41 @@ import { useParams, Link } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 
+// API call helper
+const apiCall = async (endpoint, options = {}) => {
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const url = `${baseURL}${endpoint}`;
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, config);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export default function PropertyReviewsPage() {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [property, setProperty] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [ratingBreakdown, setRatingBreakdown] = useState({});
+  const [reviewSummary, setReviewSummary] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     rating: 0,
@@ -17,144 +46,72 @@ export default function PropertyReviewsPage() {
     recommend: true
   });
 
-  // Mock property data
-  const mockProperty = {
-    id: 'prop-1',
-    title: 'Luxury Apartment in Dhanmondi',
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80',
-    type: 'Apartment',
-    location: 'Dhanmondi, Dhaka',
-    price: 45000,
-    overallRating: 4.6,
-    totalReviews: 23
-  };
+  // Fetch property and reviews data
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  // Mock reviews data
-  const mockReviews = [
-    {
-      id: 1,
-      author: 'Sarah Ahmed',
-      authorInitials: 'SA',
-      rating: 5,
-      title: 'Perfect Home for Our Family',
-      content: 'We absolutely love this apartment! The location is perfect with great access to schools and shopping. The landlord is very responsive and the building management is excellent. Clean, safe, and exactly what we were looking for. The apartment gets great natural light and the kitchen is spacious.',
-      date: '2 days ago',
-      verified: true,
-      helpful: 24,
-      aspects: {
-        location: 5,
-        landlord: 5,
-        valueForMoney: 4,
-        amenities: 4
-      },
-      stayDuration: '8 months',
-      recommend: true,
-      photos: [
-        'https://images.unsplash.com/photo-1560448204-e1a3ecb4d0bd?w=400&q=80',
-        'https://images.unsplash.com/photo-1560449752-90e24b65d72b?w=400&q=80'
-      ]
-    },
-    {
-      id: 2,
-      author: 'Mohammad Rahman',
-      authorInitials: 'MR',
-      rating: 4,
-      title: 'Good Location, Minor Maintenance Issues',
-      content: 'The apartment is in an excellent location and the building is well-maintained. However, we had some issues with the plumbing that took a while to get fixed. The landlord is generally responsive but could be better with urgent repairs. Overall, it&apos;s a decent place to live.',
-      date: '1 week ago',
-      verified: true,
-      helpful: 12,
-      aspects: {
-        location: 5,
-        landlord: 3,
-        valueForMoney: 4,
-        amenities: 4
-      },
-      stayDuration: '1 year',
-      recommend: true
-    },
-    {
-      id: 3,
-      author: 'Fatima Khan',
-      authorInitials: 'FK',
-      rating: 5,
-      title: 'Excellent Living Experience',
-      content: 'This has been our home for over two years and we couldn&apos;t be happier. The building security is top-notch, parking is convenient, and the neighbors are friendly. The apartment itself is spacious and well-designed. Maintenance requests are handled promptly.',
-      date: '2 weeks ago',
-      verified: true,
-      helpful: 18,
-      aspects: {
-        location: 5,
-        landlord: 5,
-        valueForMoney: 5,
-        amenities: 5
-      },
-      stayDuration: '2+ years',
-      recommend: true,
-      photos: [
-        'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=400&q=80'
-      ]
-    },
-    {
-      id: 4,
-      author: 'Ahmed Hassan',
-      authorInitials: 'AH',
-      rating: 3,
-      title: 'Average Experience',
-      content: 'The apartment is okay but nothing special. The rent seems a bit high for what you get. The building is getting old and could use some updates. Location is good though, and parking is available. The landlord is decent but not very proactive with maintenance.',
-      date: '3 weeks ago',
-      verified: false,
-      helpful: 8,
-      aspects: {
-        location: 4,
-        landlord: 3,
-        valueForMoney: 2,
-        amenities: 3
-      },
-      stayDuration: '6 months',
-      recommend: false
-    },
-    {
-      id: 5,
-      author: 'Rashida Begum',
-      authorInitials: 'RB',
-      rating: 4.5,
-      title: 'Great for Families',
-      content: 'This apartment has been wonderful for our family. The kids love having space to play, and the building has good security. The location is perfect for schools and parks. Only minor complaint is that the elevator can be slow during peak hours, but that&apos;s a small issue.',
-      date: '1 month ago',
-      verified: true,
-      helpful: 15,
-      aspects: {
-        location: 5,
-        landlord: 4,
-        valueForMoney: 4,
-        amenities: 5
-      },
-      stayDuration: '1.5 years',
-      recommend: true
+      // Fetch property details and reviews in parallel
+      const [propertyResponse, reviewsResponse] = await Promise.all([
+        apiCall(`/properties/${id}`),
+        apiCall(`/properties/${id}/reviews`)
+      ]);
+
+      if (propertyResponse.status === 'success') {
+        // Transform property data for display
+        const propertyData = propertyResponse.data.property;
+        setProperty({
+          id: propertyData.id,
+          title: propertyData.title,
+          image: propertyData.images && propertyData.images.length > 0 
+            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${propertyData.images[0]}` 
+            : '/images/properties/default.jpg',
+          type: propertyData.propertyType,
+          location: `${propertyData.city}, ${propertyData.state}`,
+          price: propertyData.monthlyRent || 0,
+          overallRating: propertyData.averageRating || 0,
+          totalReviews: propertyData.reviewCount || 0
+        });
+      }
+
+      if (reviewsResponse.status === 'success') {
+        // Transform reviews data
+        const transformedReviews = reviewsResponse.data.reviews.map(review => ({
+          id: review.id,
+          author: `${review.author.firstName} ${review.author.lastName}`,
+          authorInitials: `${review.author.firstName[0]}${review.author.lastName[0]}`,
+          rating: review.rating,
+          title: review.title || 'Review',
+          content: review.content,
+          date: new Date(review.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          verified: true, // Assume verified for now
+          helpful: 0, // API doesn't provide helpful count
+          aspects: {}, // API doesn't provide aspects breakdown
+          stayDuration: 'Unknown', // API doesn't provide stay duration
+          recommend: review.recommend !== false, // Default to true if not specified
+          photos: review.photos || []
+        }));
+
+        setReviews(transformedReviews);
+        setReviewSummary(reviewsResponse.data.summary);
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching property reviews:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  // Mock rating breakdown
-  const mockRatingBreakdown = {
-    5: 14, // 60.9%
-    4: 6,  // 26.1%
-    3: 2,  // 8.7%
-    2: 1,  // 4.3%
-    1: 0   // 0%
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setProperty(mockProperty);
-      setReviews(mockReviews);
-      setRatingBreakdown(mockRatingBreakdown);
-      setLoading(false);
-    };
-
-    fetchData();
+    if (id) {
+      fetchData();
+    }
   }, [id]);
 
   const handleReviewSubmit = async (e) => {
@@ -259,6 +216,25 @@ export default function PropertyReviewsPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Container className="flex-1 py-8 text-center">
+          <div className="w-24 h-24 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Error Loading Reviews
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+          <Button onClick={fetchData}>Try Again</Button>
+        </Container>
+      </div>
+    );
+  }
+
   if (!property) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -277,7 +253,7 @@ export default function PropertyReviewsPage() {
     );
   }
 
-  const totalReviews = Object.values(ratingBreakdown).reduce((sum, count) => sum + count, 0);
+  const totalReviews = reviewSummary ? reviewSummary.totalReviews : 0;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -547,7 +523,7 @@ export default function PropertyReviewsPage() {
 
               <div className="space-y-3">
                 {[5, 4, 3, 2, 1].map((stars) => {
-                  const count = ratingBreakdown[stars] || 0;
+                  const count = reviewSummary ? (reviewSummary.ratingDistribution[stars] || 0) : 0;
                   const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
                   
                   return (

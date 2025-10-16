@@ -51,7 +51,7 @@ export default function HomePage() {
       <div className="relative border-b border-border/60 dark:border-[#334155] overflow-hidden min-h-[75vh] sm:min-h-[85vh] flex items-center">
         <div className="absolute inset-0">
           <img
-            src="https://images.pexels.com/photos/7031403/pexels-photo-7031403.jpeg?auto=compress&cs=tinysrgb&w=1600"
+            src="/images/properties/properties_14.jpg"
             alt="City skyline"
             className="w-full h-full object-cover object-center"
             loading="lazy"
@@ -255,8 +255,8 @@ export default function HomePage() {
                 className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-500"
                 style={{
                   backgroundImage: f.tone === 'primary'
-                    ? 'url(https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=800)'
-                    : 'url(https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=800)',
+                    ? 'url(/images/properties/properties_10.jpg)'
+                    : 'url(/images/properties/properties_11.jpg)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
@@ -313,7 +313,7 @@ export default function HomePage() {
                 <div className="relative h-full w-full rounded-[0.95rem] overflow-hidden">
                   <div className="relative h-48 w-full overflow-hidden">
                     <img
-                      src={`https://images.pexels.com/photos/${i === 1 ? '259602' : i === 2 ? '1396132' : i === 3 ? '106399' : '1571460'}/pexels-photo-${i === 1 ? '259602' : i === 2 ? '1396132' : i === 3 ? '106399' : '1571460'}.jpeg?auto=compress&cs=tinysrgb&w=800`}
+                      src={`/images/properties/properties_${4 + i}.jpg`}
                       alt={`Sample Property ${i}`}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       loading="lazy"
@@ -350,7 +350,7 @@ export default function HomePage() {
         {/* Full-width background image */}
         <div className="absolute inset-0">
           <img
-            src="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1600"
+            src="/images/properties/properties_12.jpg"
             alt="Modern city architecture"
             className="w-full h-full object-cover object-center"
             loading="lazy"

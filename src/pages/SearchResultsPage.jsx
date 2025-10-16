@@ -1,8 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 import PropertyCard from '../components/PropertyCard.jsx';
+
+// API call helper
+const apiCall = async (endpoint, options = {}) => {
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const url = `${baseURL}${endpoint}`;
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, config);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
 
 export default function SearchResultsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,55 +45,95 @@ export default function SearchResultsPage() {
     propertyType: '',
     bedrooms: '',
     bathrooms: '',
-    sortBy: 'relevance'
+    sortBy: 'createdAt'
+  });
+
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
   });
 
   const [showFilters, setShowFilters] = useState(false);
   const [viewStyle, setViewStyle] = useState('grid'); // 'grid' or 'list'
 
-  // Mock property data - filtered based on search query
-  const allProperties = Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    title: `${['Modern', 'Luxury', 'Cozy', 'Spacious', 'Contemporary', 'Beautiful'][i % 6]} ${['Apartment', 'House', 'Condo', 'Studio'][i % 4]} ${i + 1}`,
-    location: ['Dhaka, Gulshan', 'Dhaka, Dhanmondi', 'Chittagong, GEC', 'Chittagong, Agrabad', 'Sylhet, Zindabazar', 'Sylhet, Ambarkhana', 'Rajshahi, New Market', 'Rajshahi, Shaheb Bazar'][i % 8],
-    price: [1200, 1800, 2200, 850, 1500, 2000, 1100, 1650, 1950, 900, 1350, 1750, 2100, 980, 1420, 1880, 2300, 1050, 1600, 2050][i],
-    bedrooms: [2, 3, 1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 4, 1, 2, 3, 4, 2, 3, 1][i],
-    bathrooms: [1, 2, 1, 1, 2, 3, 1, 2, 2, 1, 1, 2, 3, 1, 2, 2, 3, 1, 2, 1][i],
-    sqft: [1200, 1800, 800, 1100, 1600, 2200, 750, 1350, 1900, 650, 1000, 1550, 2100, 720, 1250, 1750, 2300, 900, 1400, 1800][i],
-    image: `https://images.pexels.com/photos/${[1396122, 2121121, 2102587, 2343468, 2462015, 3555615, 2102586, 3288103, 3288100, 2462016, 2121120, 2343469, 1396132, 2121131, 2102597, 2343478, 2462025, 3555625, 2102596, 3288113][i]}/pexels-photo-${[1396122, 2121121, 2102587, 2343468, 2462015, 3555615, 2102586, 3288103, 3288100, 2462016, 2121120, 2343469, 1396132, 2121131, 2102597, 2343478, 2462025, 3555625, 2102596, 3288113][i]}.jpeg?auto=compress&cs=tinysrgb&w=800`,
-    featured: i < 2,
-    available: true,
-    matchScore: Math.random() * 100, // For relevance sorting
-    // Rating data - some properties don't have ratings (simulating real-world scenario)
-    rating: i % 4 === 0 ? null : Number((3.2 + (i * 0.3) % 2.3).toFixed(1)), // Some properties without ratings
-    totalReviews: i % 4 === 0 ? 0 : Math.floor(Math.random() * 80) + 5 // Reviews count (0 for no ratings)
-  }));
+  // Fetch properties from API
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  // Filter properties based on search query
-  const filteredProperties = allProperties.filter(property => {
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        property.title.toLowerCase().includes(searchLower) ||
-        property.location.toLowerCase().includes(searchLower)
-      );
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: pagination.currentPage.toString(),
+        limit: pagination.itemsPerPage.toString(),
+        sortBy: filters.sortBy === 'createdAt' ? 'createdAt' : 'monthlyRent',
+        sortOrder: filters.sortBy === 'price-low' ? 'asc' : filters.sortBy === 'price-high' ? 'desc' : 'desc'
+      });
+
+      if (filters.search) params.set('search', filters.search);
+      if (filters.location) params.set('city', filters.location);
+      if (filters.priceMin) params.set('minPrice', filters.priceMin);
+      if (filters.priceMax) params.set('maxPrice', filters.priceMax);
+      if (filters.propertyType) params.set('propertyType', filters.propertyType);
+      if (filters.bedrooms) params.set('bedrooms', filters.bedrooms);
+      if (filters.bathrooms) params.set('bathrooms', filters.bathrooms);
+
+      const response = await apiCall(`/properties?${params.toString()}`);
+
+      if (response.status === 'success') {
+        // Transform API data to match PropertyCard expectations
+        const transformedProperties = response.data.properties.map(property => ({
+          id: property.id,
+          title: property.title,
+          location: `${property.city}, ${property.state}`,
+          price: property.monthlyRent || 0,
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          sqft: property.area,
+          image: property.images && property.images.length > 0 
+            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${property.images[0]}` 
+            : '/images/properties/default.jpg',
+          featured: false, // API doesn't have featured flag
+          rating: property.averageRating,
+          totalReviews: property.reviewCount
+        }));
+
+        setProperties(transformedProperties);
+        setPagination(response.data.pagination);
+      } else {
+        throw new Error(response.message || 'Failed to fetch properties');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching properties:', err);
+    } finally {
+      setLoading(false);
     }
-    return true;
-  }).slice(0, 15); // Show 15 results max
+  };
+
+  // Fetch properties when filters change
+  useEffect(() => {
+    fetchProperties();
+  }, [filters, pagination.currentPage]);
 
   const propertyTypes = ['Any Type', 'Apartment', 'House', 'Condo', 'Studio'];
   const bedroomOptions = ['Any', '1', '2', '3', '4+'];
   const bathroomOptions = ['Any', '1', '2', '3+'];
   const sortOptions = [
-    { value: 'relevance', label: 'Most Relevant' },
+    { value: 'createdAt', label: 'Newest First' },
     { value: 'price-low', label: 'Price: Low to High' },
-    { value: 'price-high', label: 'Price: High to Low' },
-    { value: 'newest', label: 'Newest First' },
-    { value: 'oldest', label: 'Oldest First' }
+    { value: 'price-high', label: 'Price: High to Low' }
   ];
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+    // Reset to page 1 when filters change
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const handleNewSearch = () => {
@@ -74,6 +142,12 @@ export default function SearchResultsPage() {
     if (filters.search) params.set('search', filters.search);
     if (filters.location) params.set('location', filters.location);
     setSearchParams(params);
+    // Reset to page 1 for new search
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
   };
 
   const clearSearch = () => {
@@ -93,7 +167,7 @@ export default function SearchResultsPage() {
                 Search Results for &ldquo;{searchQuery}&rdquo;
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                {filteredProperties.length} properties found
+                {properties.length} properties found
               </p>
             </div>
           )}
@@ -298,7 +372,22 @@ export default function SearchResultsPage() {
 
           {/* Main Results Area */}
           <main className="flex-1 min-w-0 w-full lg:w-auto overflow-hidden">
-            {filteredProperties.length === 0 ? (
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="w-24 h-24 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Error Loading Properties</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+                <Button onClick={fetchProperties}>Try Again</Button>
+              </div>
+            ) : properties.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                   <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +406,7 @@ export default function SearchResultsPage() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {filteredProperties.length} Properties Found
+                      {properties.length} Properties Found
                     </h2>
                     {searchQuery && (
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -382,7 +471,7 @@ export default function SearchResultsPage() {
                     ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' 
                     : 'grid grid-cols-1 gap-4'
                   }>
-                    {filteredProperties.map((property) => (
+                    {properties.map((property) => (
                       <PropertyCard 
                         key={property.id}
                         property={property}
@@ -399,11 +488,16 @@ export default function SearchResultsPage() {
                 {/* Pagination */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-200/60 dark:border-gray-700/60">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Showing 1-{filteredProperties.length} of {filteredProperties.length} results
+                    Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1}-{Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} results
                   </p>
                   
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={pagination.currentPage === 1}
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
@@ -411,12 +505,31 @@ export default function SearchResultsPage() {
                     </Button>
                     
                     <div className="flex items-center gap-1">
-                      <button className="px-3 py-1 text-sm rounded-md bg-primary-600 text-white">
-                        1
-                      </button>
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(pagination.totalPages - 4, pagination.currentPage - 2)) + i;
+                        if (pageNum > pagination.totalPages) return null;
+                        return (
+                          <button 
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`px-3 py-1 text-sm rounded-md ${
+                              pageNum === pagination.currentPage
+                                ? 'bg-primary-600 text-white'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
                     </div>
                     
-                    <Button variant="outline" size="sm" disabled>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={pagination.currentPage === pagination.totalPages}
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    >
                       Next
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

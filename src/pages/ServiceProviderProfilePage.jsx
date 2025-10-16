@@ -7,126 +7,66 @@ export default function ServiceProviderProfilePage() {
   const { category, providerId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [provider, setProvider] = useState(null);
 
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Mock provider data
-  const mockProvider = {
-    id: 'clean-pro-1',
-    name: 'CleanPro Bangladesh',
-    rating: 4.8,
-    reviewsCount: 156,
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=80',
-    coverImage: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1200&q=80',
-    verified: true,
-    availability: 'available',
-    responseTime: '< 2 hours',
-    completedJobs: 324,
-    yearsExperience: 5,
-    description: 'CleanPro Bangladesh is a professional cleaning service company with over 5 years of experience in providing high-quality cleaning solutions for homes and offices. We use eco-friendly products and have a team of trained and experienced cleaning professionals.',
-    coverage: ['Dhaka', 'Chittagong', 'Sylhet'],
-    certifications: ['ISO 9001', 'Green Cleaning Certified', 'Bonded & Insured'],
-    services: [
-      {
-        id: 'deep-cleaning',
-        name: 'Deep Cleaning',
-        description: 'Comprehensive deep cleaning service for your entire home',
-        price: 3500,
-        duration: '4-6 hours',
-        includes: ['All rooms cleaning', 'Kitchen deep clean', 'Bathroom sanitization', 'Window cleaning', 'Appliance cleaning']
-      },
-      {
-        id: 'regular-cleaning',
-        name: 'Regular Cleaning',
-        description: 'Weekly or bi-weekly maintenance cleaning',
-        price: 2500,
-        duration: '2-3 hours',
-        includes: ['Dusting and vacuuming', 'Kitchen cleaning', 'Bathroom cleaning', 'Floor mopping', 'Trash removal']
-      },
-      {
-        id: 'office-cleaning',
-        name: 'Office Cleaning',
-        description: 'Professional office and commercial space cleaning',
-        price: 4000,
-        duration: '3-5 hours',
-        includes: ['Desk and surface cleaning', 'Floor maintenance', 'Restroom sanitization', 'Common area cleaning', 'Trash management']
-      },
-      {
-        id: 'post-construction',
-        name: 'Post Construction Cleaning',
-        description: 'Specialized cleaning after construction or renovation',
-        price: 5500,
-        duration: '6-8 hours',
-        includes: ['Debris removal', 'Dust elimination', 'Surface polishing', 'Window and fixture cleaning', 'Final touch-ups']
-      }
-    ],
-    portfolio: [
-      {
-        id: 1,
-        image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=80',
-        title: 'Modern Apartment Deep Clean',
-        description: 'Complete deep cleaning of a 2-bedroom modern apartment'
-      },
-      {
-        id: 2,
-        image: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=80',
-        title: 'Corporate Office Cleaning',
-        description: 'Regular maintenance cleaning for a 50-employee office'
-      },
-      {
-        id: 3,
-        image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
-        title: 'Post-Renovation Cleanup',
-        description: 'Specialized cleaning after kitchen renovation project'
-      }
-    ],
-    reviews: [
-      {
-        id: 1,
-        author: 'Sarah Ahmed',
-        rating: 5,
-        date: '2 weeks ago',
-        service: 'Deep Cleaning',
-        comment: 'Absolutely fantastic service! The team was professional, thorough, and left my apartment spotless. They used eco-friendly products as promised and were very respectful of my belongings.',
-        verified: true
-      },
-      {
-        id: 2,
-        author: 'Mohammad Rahman',
-        rating: 4.5,
-        date: '1 month ago',
-        service: 'Office Cleaning',
-        comment: 'Great service for our office space. They are reliable and always arrive on time. The cleaning quality is consistent and the staff is well-trained.',
-        verified: true
-      },
-      {
-        id: 3,
-        author: 'Fatima Khan',
-        rating: 5,
-        date: '1 month ago',
-        service: 'Regular Cleaning',
-        comment: 'I have been using CleanPro for my weekly cleaning for 6 months now. They are dependable, affordable, and do excellent work. Highly recommended!',
-        verified: true
-      }
-    ],
-    contact: {
-      phone: '+880-1234-567890',
-      email: 'info@cleanpro.bd',
-      address: 'House 123, Road 45, Dhanmondi, Dhaka',
-      workingHours: 'Mon-Sat: 8:00 AM - 8:00 PM, Sun: 10:00 AM - 6:00 PM'
-    }
-  };
+  // API base URL
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-  useEffect(() => {
-    const fetchProvider = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setProvider(mockProvider);
-      setLoading(false);
+  // Helper function to make API calls
+  const apiCall = async (endpoint, options = {}) => {
+    const url = `${API_BASE}${endpoint}`;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
     };
 
-    fetchProvider();
+    // Add auth token if available
+    const token = localStorage.getItem('dreamnest-token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  };
+
+  // Fetch provider data from API
+  useEffect(() => {
+    const fetchProvider = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await apiCall(`/services/providers/${providerId}`);
+
+        if (response.status === 'success') {
+          setProvider(response.data.provider);
+        } else {
+          throw new Error(response.message || 'Failed to fetch provider details');
+        }
+      } catch (err) {
+        console.error('Error fetching provider:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (providerId) {
+      fetchProvider();
+    }
   }, [providerId]);
 
   const StarRating = ({ rating, size = 'sm', clickable = false, onClick }) => {
@@ -239,6 +179,57 @@ export default function ServiceProviderProfilePage() {
           <Link to="/services">
             <Button>Back to Services</Button>
           </Link>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Container className="flex-1 py-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="w-24 h-24 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Error Loading Provider</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <div className="space-x-3">
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+              <Link to="/services">
+                <Button variant="outline">
+                  Back to Services
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  if (!provider) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Container className="flex-1 py-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Provider Not Found</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              The service provider you&apos;re looking for doesn&apos;t exist or has been removed.
+            </p>
+            <Link to="/services">
+              <Button>Back to Services</Button>
+            </Link>
+          </div>
         </Container>
       </div>
     );

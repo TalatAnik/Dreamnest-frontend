@@ -28,7 +28,7 @@ export default function ServiceBookingFormPage() {
   const mockProvider = {
     id: 'clean-pro-1',
     name: 'CleanPro Bangladesh',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
+    image: '/images/services/services_29.jpg',
     services: [
       {
         id: 'deep-cleaning',

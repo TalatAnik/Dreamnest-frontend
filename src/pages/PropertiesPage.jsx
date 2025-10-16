@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
@@ -7,6 +7,9 @@ import PropertyCard from '../components/PropertyCard.jsx';
 
 export default function PropertiesPage() {
   const { user } = useAuth();
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
     location: '',
@@ -21,22 +24,75 @@ export default function PropertiesPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewStyle, setViewStyle] = useState('grid'); // 'grid' or 'list'
 
-  // Mock property data - only available properties
-  const mockProperties = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    title: `Modern ${['Apartment', 'House', 'Condo', 'Studio'][i % 4]} ${i + 1}`,
-    location: ['Dhaka, Gulshan', 'Chittagong, GEC', 'Sylhet, Zindabazar', 'Rajshahi, New Market'][i % 4],
-    price: [1200, 1800, 2200, 850, 1500, 2000, 1100, 1650, 1950, 900, 1350, 1750][i],
-    bedrooms: [2, 3, 1, 2, 3, 4, 1, 2, 3, 1, 2, 3][i],
-    bathrooms: [1, 2, 1, 1, 2, 3, 1, 2, 2, 1, 1, 2][i],
-    sqft: [1200, 1800, 800, 1100, 1600, 2200, 750, 1350, 1900, 650, 1000, 1550][i],
-    image: `https://images.pexels.com/photos/${[1396122, 2121121, 2102587, 2343468, 2462015, 3555615, 2102586, 3288103, 3288100, 2462016, 2121120, 2343469][i]}/pexels-photo-${[1396122, 2121121, 2102587, 2343468, 2462015, 3555615, 2102586, 3288103, 3288100, 2462016, 2121120, 2343469][i]}.jpeg?auto=compress&cs=tinysrgb&w=800`,
-    featured: i < 3,
-    available: true, // All properties are available now
-    // Rating data - some properties don't have ratings (simulating real-world scenario)
-    rating: i % 5 === 0 ? null : Number((3.5 + (i * 0.2) % 2).toFixed(1)), // Some properties without ratings
-    totalReviews: i % 5 === 0 ? 0 : Math.floor(Math.random() * 50) + 3 // Reviews count (0 for no ratings)
-  }));
+  // API base URL
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+  // Helper function to make API calls
+  const apiCall = async (endpoint, options = {}) => {
+    const url = `${API_BASE}${endpoint}`;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    // Add auth token if available
+    const token = localStorage.getItem('dreamnest-token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  };
+
+  // Fetch properties from API
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (filters.search) params.append('search', filters.search);
+      if (filters.location) params.append('location', filters.location);
+      if (filters.priceMin) params.append('priceMin', filters.priceMin);
+      if (filters.priceMax) params.append('priceMax', filters.priceMax);
+      if (filters.propertyType && filters.propertyType !== 'Any Type') params.append('type', filters.propertyType.toLowerCase());
+      if (filters.bedrooms && filters.bedrooms !== 'Any') params.append('bedrooms', filters.bedrooms);
+      if (filters.bathrooms && filters.bathrooms !== 'Any') params.append('bathrooms', filters.bathrooms);
+      if (filters.sortBy) params.append('sortBy', filters.sortBy);
+
+      const queryString = params.toString();
+      const endpoint = `/properties${queryString ? `?${queryString}` : ''}`;
+
+      const response = await apiCall(endpoint);
+
+      if (response.status === 'success') {
+        setProperties(response.data.properties || []);
+      } else {
+        throw new Error(response.message || 'Failed to fetch properties');
+      }
+    } catch (err) {
+      console.error('Error fetching properties:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch properties on component mount and when filters change
+  useEffect(() => {
+    fetchProperties();
+  }, [filters]);
 
   const propertyTypes = ['Any Type', 'Apartment', 'House', 'Condo', 'Studio'];
   const bedroomOptions = ['Any', '1', '2', '3', '4+'];
@@ -266,10 +322,10 @@ export default function PropertiesPage() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4 w-full">
               <div className="text-center lg:text-left">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {mockProperties.length} Properties Found
+                  {loading ? 'Loading Properties...' : `${properties.length} Properties Found`}
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Showing results for all locations
+                  {loading ? 'Fetching latest listings' : 'Showing results for all locations'}
                 </p>
               </div>
 
@@ -323,24 +379,85 @@ export default function PropertiesPage() {
               </div>
             </div>
 
+            {/* Error State */}
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <h3 className="text-sm font-medium text-red-800 dark:text-red-200">Error Loading Properties</h3>
+                    <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchProperties}
+                  className="mt-3 border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"
+                >
+                  Try Again
+                </Button>
+              </div>
+            )}
+
             {/* Properties Display - Grid/List View */}
             <div className="mb-8 w-full">
-              <div className={viewStyle === 'grid' 
-                ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' 
-                : 'grid grid-cols-1 gap-4'
-              }>
-                {mockProperties.map((property) => (
-                  <PropertyCard 
-                    key={property.id}
-                    property={property}
-                    viewStyle={viewStyle}
-                    onViewDetails={(property) => {
-                      console.log('View details for:', property.title);
-                      // TODO: Navigate to property detail page
-                    }}
-                  />
-                ))}
-              </div>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden animate-pulse">
+                      <div className="h-48 bg-gray-200 dark:bg-gray-700"></div>
+                      <div className="p-4 space-y-3">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : properties.length === 0 ? (
+                <div className="text-center py-12">
+                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Properties Found</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">Try adjusting your filters or search criteria.</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setFilters({
+                      search: '',
+                      location: '',
+                      priceMin: '',
+                      priceMax: '',
+                      propertyType: '',
+                      bedrooms: '',
+                      bathrooms: '',
+                      sortBy: 'relevance'
+                    })}
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              ) : (
+                <div className={viewStyle === 'grid' 
+                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' 
+                  : 'grid grid-cols-1 gap-4'
+                }>
+                  {properties.map((property) => (
+                    <PropertyCard 
+                      key={property.id}
+                      property={property}
+                      viewStyle={viewStyle}
+                      onViewDetails={(property) => {
+                        console.log('View details for:', property.title);
+                        // TODO: Navigate to property detail page
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Pagination */}

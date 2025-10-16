@@ -3,179 +3,91 @@ import { useParams, Link } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
 
+// API call helper
+const apiCall = async (endpoint, options = {}) => {
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const url = `${baseURL}${endpoint}`;
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, config);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export default function ServiceProviderReviewsPage() {
   const { providerId } = useParams();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [provider, setProvider] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [reviewSummary, setReviewSummary] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
 
-  // Mock provider data
-  const mockProvider = {
-    id: 'clean-pro-1',
-    name: 'CleanPro Bangladesh',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
-    coverImage: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1200&q=80',
-    category: 'cleaning',
-    rating: 4.8,
-    totalReviews: 156,
-    completedJobs: 324,
-    responseTime: '< 2 hours',
-    verified: true
+  // Fetch provider and reviews data
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch provider profile (Note: /api/services/providers/${providerId} endpoint doesn't exist yet)
+      // Using profile endpoint as fallback
+      const profileResponse = await apiCall(`/upload/profile/${providerId}`);
+
+      if (profileResponse.status === 'success') {
+        const userData = profileResponse.data;
+        // Transform user data to provider format (limited data available)
+        setProvider({
+          id: userData.id,
+          name: `${userData.firstName} ${userData.lastName}`,
+          image: userData.avatar ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${userData.avatar}` : '/images/default-avatar.jpg',
+          coverImage: '/images/services/default-cover.jpg', // Default cover
+          category: 'Service Provider',
+          rating: 0, // Would need to calculate from reviews
+          totalReviews: userData._count?.reviews || 0,
+          completedJobs: 0, // Not available in profile
+          responseTime: 'Unknown', // Not available
+          verified: true // Assume verified for now
+        });
+      }
+
+      // For reviews, we would need to get all services by this provider first, then get reviews for each service
+      // This is complex, so for now we'll show empty reviews with a note
+      setReviews([]);
+      setReviewSummary({
+        totalReviews: 0,
+        averageRating: 0,
+        ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      });
+
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching service provider reviews:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Mock reviews with work samples
-  const mockReviews = [
-    {
-      id: 1,
-      author: 'Sarah Ahmed',
-      authorInitials: 'SA',
-      rating: 5,
-      title: 'Exceptional Deep Cleaning Service',
-      content: 'The team from CleanPro did an absolutely fantastic job with our apartment deep cleaning. They arrived exactly on time, were very professional, and used eco-friendly products as promised. Every corner was spotless, and they even organized some areas without being asked. The attention to detail was remarkable.',
-      date: '3 days ago',
-      verified: true,
-      helpful: 28,
-      service: 'Deep Cleaning',
-      projectDetails: '3-bedroom apartment, 1,200 sq ft',
-      photos: [
-        'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
-        'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=80',
-        'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=80'
-      ],
-      aspects: {
-        punctuality: 5,
-        professionalism: 5,
-        quality: 5,
-        communication: 5,
-        valueForMoney: 4
-      },
-      providerResponse: {
-        date: '2 days ago',
-        content: 'Thank you so much for your wonderful review, Sarah! We&apos;re delighted that you were satisfied with our deep cleaning service. Your satisfaction is our top priority, and we look forward to serving you again in the future.'
-      }
-    },
-    {
-      id: 2,
-      author: 'Mohammad Rahman',
-      authorInitials: 'MR',
-      rating: 4.5,
-      title: 'Reliable Office Cleaning Service',
-      content: 'We&apos;ve been using CleanPro for our office cleaning for 6 months now, and they&apos;ve been consistently reliable. The team is professional, efficient, and works around our schedule. The office always looks spotless after their visits. Occasionally they miss some details, but overall very satisfied.',
-      date: '1 week ago',
-      verified: true,
-      helpful: 15,
-      service: 'Office Cleaning',
-      projectDetails: 'Corporate office, 50 employees, 2,000 sq ft',
-      photos: [
-        'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&q=80'
-      ],
-      aspects: {
-        punctuality: 5,
-        professionalism: 4,
-        quality: 4,
-        communication: 4,
-        valueForMoney: 5
-      },
-      providerResponse: {
-        date: '6 days ago',
-        content: 'Thank you for your continued trust in our services, Mohammad! We appreciate your feedback about attention to detail - we&apos;ve shared this with our team to ensure even better service quality. We&apos;re grateful for your business over the past 6 months.'
-      }
-    },
-    {
-      id: 3,
-      author: 'Fatima Khan',
-      authorInitials: 'FK',
-      rating: 5,
-      title: 'Perfect Move-Out Cleaning',
-      content: 'I hired CleanPro for move-out cleaning of my rental apartment, and they exceeded all expectations. The apartment looked better than when I first moved in! The landlord was impressed and returned my full security deposit. The team was thorough, efficient, and very reasonably priced.',
-      date: '2 weeks ago',
-      verified: true,
-      helpful: 22,
-      service: 'Move-out Cleaning',
-      projectDetails: '2-bedroom apartment, complete deep clean',
-      photos: [
-        'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80',
-        'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80'
-      ],
-      aspects: {
-        punctuality: 5,
-        professionalism: 5,
-        quality: 5,
-        communication: 5,
-        valueForMoney: 5
-      },
-      providerResponse: {
-        date: '1 week ago',
-        content: 'Fatima, we&apos;re thrilled to hear about your experience and that you got your full deposit back! That&apos;s exactly what we aim for with our move-out cleaning service. Thank you for choosing CleanPro and for this wonderful review!'
-      }
-    },
-    {
-      id: 4,
-      author: 'Ahmed Hassan',
-      authorInitials: 'AH',
-      rating: 4,
-      title: 'Good Service, Minor Communication Issues',
-      content: 'The cleaning quality was good and the team was professional. However, there were some communication issues regarding scheduling changes. They did accommodate our request for rescheduling, but it took several calls to coordinate. The actual cleaning work was thorough and satisfactory.',
-      date: '3 weeks ago',
-      verified: true,
-      helpful: 8,
-      service: 'Regular Cleaning',
-      projectDetails: 'Weekly cleaning service, 3-bedroom house',
-      photos: [],
-      aspects: {
-        punctuality: 4,
-        professionalism: 4,
-        quality: 4,
-        communication: 3,
-        valueForMoney: 4
-      },
-      providerResponse: {
-        date: '3 weeks ago',
-        content: 'Thank you for your feedback, Ahmed. We apologize for the communication difficulties you experienced. We&apos;ve since improved our scheduling system and customer service protocols to ensure better coordination. We appreciate your patience and continued trust in our services.'
-      }
-    },
-    {
-      id: 5,
-      author: 'Rashida Begum',
-      authorInitials: 'RB',
-      rating: 5,
-      title: 'Outstanding Post-Construction Cleanup',
-      content: 'After our home renovation, the house was a complete mess. CleanPro&apos;s post-construction cleaning service was a lifesaver! They removed all the dust, debris, and construction residue. The team worked for 8 hours straight and transformed our house back to a livable condition. Highly recommend for renovation cleanup!',
-      date: '1 month ago',
-      verified: true,
-      helpful: 31,
-      service: 'Post-Construction Cleaning',
-      projectDetails: 'Complete house renovation cleanup, 1,800 sq ft',
-      photos: [
-        'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80',
-        'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=80',
-        'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&q=80'
-      ],
-      aspects: {
-        punctuality: 5,
-        professionalism: 5,
-        quality: 5,
-        communication: 5,
-        valueForMoney: 4
-      },
-      providerResponse: {
-        date: '1 month ago',
-        content: 'Rashida, thank you for this detailed review! Post-construction cleaning is one of our specialties, and we&apos;re so glad we could help restore your home after the renovation. Your satisfaction means everything to us, and we appreciate you recommending our services!'
-      }
-    }
-  ];
-
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setProvider(mockProvider);
-      setReviews(mockReviews);
-      setLoading(false);
-    };
-
-    fetchData();
+    if (providerId) {
+      fetchData();
+    }
   }, [providerId]);
 
   const StarRating = ({ rating, size = 'sm' }) => {
@@ -260,6 +172,25 @@ export default function ServiceProviderReviewsPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Container className="flex-1 py-8 text-center">
+          <div className="w-24 h-24 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Error Loading Reviews
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+          <Button onClick={fetchData}>Try Again</Button>
+        </Container>
+      </div>
+    );
+  }
+
   if (!provider) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -290,8 +221,8 @@ export default function ServiceProviderReviewsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
           <Link to={`/services/${provider.category}`} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors whitespace-nowrap">
-            <span className="hidden sm:inline">Cleaning Services</span>
-            <span className="sm:hidden">Cleaning</span>
+            <span className="hidden sm:inline">{provider.category} Services</span>
+            <span className="sm:hidden">{provider.category}</span>
           </Link>
           <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -350,6 +281,58 @@ export default function ServiceProviderReviewsPage() {
             </Button>
           </div>
         </div>
+
+        {/* Review Summary */}
+        {reviewSummary && reviewSummary.totalReviews > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              Review Summary
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Overall Rating */}
+              <div className="text-center">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                  {reviewSummary.averageRating.toFixed(1)}
+                </div>
+                <StarRating rating={reviewSummary.averageRating} size="lg" />
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  Based on {reviewSummary.totalReviews} reviews
+                </p>
+              </div>
+
+              {/* Rating Breakdown */}
+              <div className="space-y-3">
+                {[5, 4, 3, 2, 1].map((stars) => {
+                  const count = reviewSummary.ratingDistribution[stars] || 0;
+                  const percentage = reviewSummary.totalReviews > 0 ? (count / reviewSummary.totalReviews) * 100 : 0;
+
+                  return (
+                    <div key={stars} className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {stars}
+                        </span>
+                        <svg className="w-4 h-4 text-yellow-400 fill-current flex-shrink-0" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-yellow-400 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm text-gray-600 dark:text-gray-400 min-w-0">
+                        {count}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Reviews List */}
         <div className="space-y-8">

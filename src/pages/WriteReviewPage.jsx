@@ -53,7 +53,7 @@ export default function WriteReviewPage() {
   const mockPropertyData = {
     id: 'prop-1',
     title: 'Luxury Apartment in Dhanmondi',
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=80',
+    image: '/images/properties/properties_4.jpg',
     type: 'property',
     location: 'Dhanmondi, Dhaka',
     price: 45000
@@ -62,7 +62,7 @@ export default function WriteReviewPage() {
   const mockProviderData = {
     id: 'clean-pro-1',
     name: 'CleanPro Bangladesh',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
+    image: '/images/services/services_21.jpg',
     type: 'service',
     category: 'Cleaning Services',
     services: ['Deep Cleaning', 'Regular Cleaning', 'Office Cleaning', 'Post-Construction Cleaning']

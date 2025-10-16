@@ -6,134 +6,68 @@ import Button from '../components/Button.jsx';
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [services, setServices] = useState([]);
   const [featuredProviders, setFeaturedProviders] = useState([]);
 
-  // Mock data for service categories
-  const serviceCategories = [
-    {
-      id: 'cleaning',
-      name: 'Cleaning Services',
-      icon: '🧽',
-      description: 'Professional home and office cleaning',
-      providersCount: 24,
-      avgRating: 4.6,
-      startingPrice: 2500
-    },
-    {
-      id: 'maintenance',
-      name: 'Maintenance & Repairs',
-      icon: '🔧',
-      description: 'Plumbing, electrical, and general repairs',
-      providersCount: 18,
-      avgRating: 4.4,
-      startingPrice: 1500
-    },
-    {
-      id: 'painting',
-      name: 'Painting Services',
-      icon: '🎨',
-      description: 'Interior and exterior painting',
-      providersCount: 12,
-      avgRating: 4.5,
-      startingPrice: 8000
-    },
-    {
-      id: 'security',
-      name: 'Security Services',
-      icon: '🛡️',
-      description: 'Security guards and surveillance',
-      providersCount: 15,
-      avgRating: 4.7,
-      startingPrice: 12000
-    },
-    {
-      id: 'moving',
-      name: 'Moving Services',
-      icon: '📦',
-      description: 'Packing, moving, and storage',
-      providersCount: 8,
-      avgRating: 4.3,
-      startingPrice: 5000
-    },
-    {
-      id: 'gardening',
-      name: 'Gardening & Landscaping',
-      icon: '🌱',
-      description: 'Garden maintenance and landscaping',
-      providersCount: 10,
-      avgRating: 4.6,
-      startingPrice: 3000
-    }
-  ];
+  // API base URL
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-  // Mock data for featured providers
-  const mockFeaturedProviders = [
-    {
-      id: 'clean-pro-1',
-      name: 'CleanPro Bangladesh',
-      category: 'cleaning',
-      rating: 4.8,
-      reviewsCount: 156,
-      image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
-      services: ['Deep Cleaning', 'Regular Cleaning', 'Office Cleaning'],
-      startingPrice: 2500,
-      verified: true,
-      responseTime: '< 2 hours',
-      completedJobs: 324
-    },
-    {
-      id: 'fix-masters-1',
-      name: 'FixMasters',
-      category: 'maintenance',
-      rating: 4.6,
-      reviewsCount: 89,
-      image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=80',
-      services: ['Plumbing', 'Electrical', 'AC Repair'],
-      startingPrice: 1500,
-      verified: true,
-      responseTime: '< 1 hour',
-      completedJobs: 198
-    },
-    {
-      id: 'paint-experts-1',
-      name: 'Paint Experts',
-      category: 'painting',
-      rating: 4.7,
-      reviewsCount: 67,
-      image: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&q=80',
-      services: ['Interior Painting', 'Exterior Painting', 'Wall Decoration'],
-      startingPrice: 8000,
-      verified: true,
-      responseTime: '< 4 hours',
-      completedJobs: 145
-    },
-    {
-      id: 'secure-guard-1',
-      name: 'SecureGuard Services',
-      category: 'security',
-      rating: 4.9,
-      reviewsCount: 203,
-      image: 'https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=400&q=80',
-      services: ['Security Guards', 'CCTV Installation', 'Access Control'],
-      startingPrice: 12000,
-      verified: true,
-      responseTime: '< 30 minutes',
-      completedJobs: 412
-    }
-  ];
-
-  useEffect(() => {
-    // Simulate API call
-    const fetchData = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setServices(serviceCategories);
-      setFeaturedProviders(mockFeaturedProviders);
-      setLoading(false);
+  // Helper function to make API calls
+  const apiCall = async (endpoint, options = {}) => {
+    const url = `${API_BASE}${endpoint}`;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
     };
 
-    fetchData();
+    // Add auth token if available
+    const token = localStorage.getItem('dreamnest-token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  };
+
+  // Fetch services and featured providers from API
+  useEffect(() => {
+    const fetchServicesData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch service categories
+        const categoriesResponse = await apiCall('/services/categories');
+        if (categoriesResponse.status === 'success') {
+          setServices(categoriesResponse.data.categories || []);
+        }
+
+        // Fetch featured providers
+        const providersResponse = await apiCall('/services/featured');
+        if (providersResponse.status === 'success') {
+          setFeaturedProviders(providersResponse.data.providers || []);
+        }
+
+      } catch (err) {
+        console.error('Error fetching services data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServicesData();
   }, []);
 
   const filteredServices = selectedCategory === 'all' 
@@ -204,24 +138,61 @@ export default function ServicesPage() {
             </div>
 
             {/* Service categories skeleton */}
-            <div className="mb-16">
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-8"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
-                ))}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-4 w-1/2"></div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Featured providers skeleton */}
-            <div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-56 mb-8"></div>
+            <div className="mb-16">
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-8 w-64"></div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
+                  <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="h-48 bg-gray-200 dark:bg-gray-700"></div>
+                    <div className="p-6">
+                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-1 w-3/4"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-3 w-1/2"></div>
+                      <div className="flex justify-between items-center">
+                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
+                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Container className="flex-1 py-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="w-24 h-24 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Error Loading Services</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
           </div>
         </Container>
       </div>
@@ -253,7 +224,7 @@ export default function ServicesPage() {
           >
             All Services
           </button>
-          {serviceCategories.map((category) => (
+          {services.map((category) => (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}

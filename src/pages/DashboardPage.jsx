@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container';
@@ -8,107 +8,72 @@ import PropertyCard from '../components/PropertyCard';
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    savedProperties: [],
+    bookingHistory: [],
+    recentSearches: [],
+    pendingReviews: [],
+    stats: {}
+  });
 
-  // Mock data for saved properties
-  const savedProperties = [
-    {
-      id: 1,
-      title: "Modern 2BR in Dhanmondi",
-      location: "Dhaka, Dhanmondi",
-      price: 1800,
-      bedrooms: 2,
-      bathrooms: 2,
-      sqft: 1350,
-      image: "https://images.pexels.com/photos/2121121/pexels-photo-2121121.jpeg?auto=compress&cs=tinysrgb&w=800",
-      rating: 4.2,
-      totalReviews: 15,
-      available: true,
-      savedDate: "2 hours ago"
-    },
-    {
-      id: 5,
-      title: "Luxury 3BR Apartment",
-      location: "Dhaka, Gulshan",
-      price: 2200,
-      bedrooms: 3,
-      bathrooms: 2,
-      sqft: 1600,
-      image: "https://images.pexels.com/photos/2462015/pexels-photo-2462015.jpeg?auto=compress&cs=tinysrgb&w=800",
-      rating: 4.8,
-      totalReviews: 28,
-      available: true,
-      savedDate: "1 day ago"
-    },
-    {
-      id: 8,
-      title: "Cozy Studio Near University",
-      location: "Dhaka, Mohakhali",
-      price: 900,
-      bedrooms: 1,
-      bathrooms: 1,
-      sqft: 650,
-      image: "https://images.pexels.com/photos/3288103/pexels-photo-3288103.jpeg?auto=compress&cs=tinysrgb&w=800",
-      rating: 4.1,
-      totalReviews: 12,
-      available: true,
-      savedDate: "3 days ago"
+  // API base URL
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+  // Helper function to make API calls
+  const apiCall = async (endpoint, options = {}) => {
+    const url = `${API_BASE}${endpoint}`;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    // Add auth token if available
+    const token = localStorage.getItem('dreamnest-token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  ];
 
-  // Mock booking history
-  const bookingHistory = [
-    {
-      id: 1,
-      serviceName: "Deep House Cleaning",
-      providerName: "CleanPro Services",
-      date: "Oct 15, 2025",
-      status: "completed",
-      rating: 5,
-      price: 80
-    },
-    {
-      id: 2,
-      serviceName: "AC Repair & Maintenance",
-      providerName: "CoolTech Solutions",
-      date: "Oct 10, 2025", 
-      status: "completed",
-      rating: 4,
-      price: 120
-    },
-    {
-      id: 3,
-      serviceName: "Plumbing Installation",
-      providerName: "AquaFix Plumbers",
-      date: "Oct 20, 2025",
-      status: "upcoming",
-      rating: null,
-      price: 150
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+      throw new Error(errorData.message || `HTTP ${response.status}`);
     }
-  ];
 
-  // Mock recent searches
-  const recentSearches = [
-    { query: "2BR apartment Gulshan", count: 12, date: "Today" },
-    { query: "Studio near university", count: 8, date: "Yesterday" },
-    { query: "3BR house Dhanmondi", count: 5, date: "2 days ago" },
-    { query: "Apartment under 1500 taka", count: 18, date: "1 week ago" }
-  ];
+    return response.json();
+  };
 
-  // Pending reviews
-  const pendingReviews = [
-    {
-      id: 1,
-      type: "service",
-      name: "CleanPro Services - Deep Cleaning",
-      date: "Oct 15, 2025"
-    },
-    {
-      id: 2,
-      type: "service", 
-      name: "CoolTech Solutions - AC Repair",
-      date: "Oct 10, 2025"
+  // Fetch dashboard data from API
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await apiCall('/dashboard');
+
+        if (response.status === 'success') {
+          setDashboardData(response.data);
+        } else {
+          throw new Error(response.message || 'Failed to fetch dashboard data');
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchDashboardData();
     }
-  ];
+  }, [user]);
 
   useEffect(() => {
     // Redirect to appropriate dashboard based on role if not renter
@@ -144,6 +109,106 @@ const DashboardPage = () => {
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-4"></div>
           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
         </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <Container>
+          <div className="animate-pulse">
+            {/* Header skeleton */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+              <div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
+              </div>
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+            </div>
+
+            {/* Stats cards skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-1"></div>
+                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
+                    </div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-8"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Main content skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left column */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Activity feed skeleton */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-4"></div>
+                  <div className="space-y-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-8"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Saved properties skeleton */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-40 mb-4"></div>
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column */}
+              <div className="space-y-6">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <Container>
+          <div className="max-w-md mx-auto text-center">
+            <div className="w-24 h-24 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Error Loading Dashboard</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </Container>
       </div>
     );
   }
@@ -190,7 +255,7 @@ const DashboardPage = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {savedProperties.length}
+                {dashboardData.savedProperties?.length || 0}
               </div>
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +271,7 @@ const DashboardPage = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {bookingHistory.length}
+                {dashboardData.bookingHistory?.length || 0}
               </div>
               <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                 <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +287,7 @@ const DashboardPage = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {pendingReviews.length}
+                {dashboardData.pendingReviews?.length || 0}
               </div>
               <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                 <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +303,7 @@ const DashboardPage = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {recentSearches.reduce((total, search) => total + search.count, 0)}
+                {dashboardData.recentSearches?.reduce((total, search) => total + (search.count || 0), 0) || 0}
               </div>
               <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
                 <svg className="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,9 +370,9 @@ const DashboardPage = () => {
                 <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
                   <p className="text-sm text-gray-900 dark:text-white">
-                    Saved {savedProperties[0].title}
+                    Saved {dashboardData.savedProperties?.[0]?.title || 'a property'}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{savedProperties[0].savedDate}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{dashboardData.savedProperties?.[0]?.savedDate || 'Recently'}</p>
                 </div>
               </div>
 
@@ -315,10 +380,10 @@ const DashboardPage = () => {
                 <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
                   <p className="text-sm text-gray-900 dark:text-white">
-                    Booked {bookingHistory[0].serviceName}
+                    Booked {dashboardData.bookingHistory?.[0]?.serviceName || 'a service'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {bookingHistory[0].status === 'completed' ? 'Completed' : 'Upcoming'} - {bookingHistory[0].date}
+                    {dashboardData.bookingHistory?.[0]?.status === 'completed' ? 'Completed' : 'Upcoming'} - {dashboardData.bookingHistory?.[0]?.date || 'TBD'}
                   </p>
                 </div>
               </div>
@@ -327,9 +392,9 @@ const DashboardPage = () => {
                 <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
                   <p className="text-sm text-gray-900 dark:text-white">
-                    Searched for &quot;{recentSearches[0].query}&quot;
+                    Searched for &quot;{dashboardData.recentSearches?.[0]?.query || 'properties'}&quot;
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{recentSearches[0].count} results - {recentSearches[0].date}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{dashboardData.recentSearches?.[0]?.count || 0} results - {dashboardData.recentSearches?.[0]?.date || 'Recently'}</p>
                 </div>
               </div>
 
@@ -337,10 +402,10 @@ const DashboardPage = () => {
                 <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
                   <p className="text-sm text-gray-900 dark:text-white">
-                    Rated {bookingHistory[1].serviceName}
+                    Rated {dashboardData.bookingHistory?.[1]?.serviceName || 'a service'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {bookingHistory[1].rating} stars - {bookingHistory[1].date}
+                    {dashboardData.bookingHistory?.[1]?.rating || 0} stars - {dashboardData.bookingHistory?.[1]?.date || 'Recently'}
                   </p>
                 </div>
               </div>
@@ -352,7 +417,7 @@ const DashboardPage = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Saved Properties ({savedProperties.length})
+              Saved Properties ({dashboardData.savedProperties?.length || 0})
             </h2>
             <Button 
               variant="outline" 
@@ -363,7 +428,7 @@ const DashboardPage = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedProperties.map((property) => (
+            {dashboardData.savedProperties?.map((property) => (
               <div key={property.id} className="relative">
                 <PropertyCard property={property} viewStyle="grid" />
                 <button
@@ -401,7 +466,7 @@ const DashboardPage = () => {
             </div>
             
             <div className="space-y-4">
-              {bookingHistory.map((booking) => (
+              {dashboardData.bookingHistory?.map((booking) => (
                 <div key={booking.id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div>
@@ -459,7 +524,7 @@ const DashboardPage = () => {
             </h2>
             
             <div className="space-y-3">
-              {recentSearches.map((search, index) => (
+              {dashboardData.recentSearches?.map((search, index) => (
                 <div 
                   key={index}
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

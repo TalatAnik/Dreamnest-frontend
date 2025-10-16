@@ -11,87 +11,65 @@ export default function PropertyDetailPage() {
   const { user, isAuthenticated } = useAuth();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
 
-  // Mock property data - in real app this would come from API
-  useEffect(() => {
-    const fetchProperty = async () => {
-      setLoading(true);
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Mock property data
-      const mockProperty = {
-        id: parseInt(id),
-        title: 'Modern Luxury Apartment in Gulshan',
-        location: 'Gulshan 2, Dhaka',
-        fullAddress: 'House 45, Road 11, Block C, Gulshan 2, Dhaka 1212',
-        price: 1800,
-        originalPrice: 2000,
-        bedrooms: 3,
-        bathrooms: 2,
-        sqft: 1600,
-        propertyType: 'Apartment',
-        furnished: 'Fully Furnished',
-        parking: 'Yes (1 space)',
-        balcony: '2 Balconies',
-        floor: '8th Floor',
-        totalFloors: 12,
-        yearBuilt: 2020,
-        available: true,
-        availableFrom: '2025-10-01',
-        deposit: 5400, // 3 months
-        rating: 4.3,
-        totalReviews: 28,
-        featured: true,
-        lastUpdated: '2025-09-20',
-        description: `This stunning modern apartment offers the perfect blend of luxury and comfort in the heart of Gulshan. With floor-to-ceiling windows, you'll enjoy abundant natural light and breathtaking city views. The open-plan living area seamlessly connects to a fully equipped modern kitchen with premium appliances.
+  // API base URL
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-The master bedroom features an en-suite bathroom and walk-in closet, while two additional bedrooms provide flexibility for guests or home office space. Two private balconies offer outdoor relaxation with panoramic views of the city skyline.
-
-Located in a premium residential building with 24/7 security, elevator access, and backup power. Walking distance to restaurants, shopping centers, and business districts.`,
-        features: [
-          'Air Conditioning',
-          'High-Speed Internet',
-          'Modern Kitchen',
-          'Dishwasher',
-          'Washing Machine',
-          'Built-in Wardrobes',
-          'City Views',
-          'Natural Light',
-          'Security System',
-          'Elevator Access',
-          'Backup Generator',
-          'Parking Space'
-        ],
-        images: [
-          'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800',
-          'https://images.pexels.com/photos/2121121/pexels-photo-2121121.jpeg?auto=compress&cs=tinysrgb&w=800',
-          'https://images.pexels.com/photos/2102587/pexels-photo-2102587.jpeg?auto=compress&cs=tinysrgb&w=800',
-          'https://images.pexels.com/photos/2343468/pexels-photo-2343468.jpeg?auto=compress&cs=tinysrgb&w=800',
-          'https://images.pexels.com/photos/2462015/pexels-photo-2462015.jpeg?auto=compress&cs=tinysrgb&w=800',
-          'https://images.pexels.com/photos/3555615/pexels-photo-3555615.jpeg?auto=compress&cs=tinysrgb&w=800'
-        ],
-        nearbyPlaces: [
-          { name: 'Gulshan 2 Circle', distance: '0.5 km', type: 'Shopping' },
-          { name: 'American International School', distance: '1.2 km', type: 'Education' },
-          { name: 'United Hospital', distance: '2.1 km', type: 'Healthcare' },
-          { name: 'Gulshan Lake Park', distance: '0.8 km', type: 'Recreation' }
-        ],
-        contact: {
-          name: 'Ahmed Real Estate',
-          phone: '+880 1XXXXXXXXX',
-          email: 'info@ahmedrealestate.com',
-          whatsapp: '+880 1XXXXXXXXX'
-        }
-      };
-
-      setProperty(mockProperty);
-      setLoading(false);
+  // Helper function to make API calls
+  const apiCall = async (endpoint, options = {}) => {
+    const url = `${API_BASE}${endpoint}`;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
     };
 
-    fetchProperty();
+    // Add auth token if available
+    const token = localStorage.getItem('dreamnest-token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  };
+
+  // Fetch property from API
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await apiCall(`/properties/${id}`);
+
+        if (response.status === 'success') {
+          setProperty(response.data.property);
+        } else {
+          throw new Error(response.message || 'Failed to fetch property details');
+        }
+      } catch (err) {
+        console.error('Error fetching property:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProperty();
+    }
   }, [id]);
 
   const StarRating = ({ rating, totalReviews, size = 'sm', clickable = false, onClick }) => {
@@ -290,6 +268,32 @@ Located in a premium residential building with 24/7 security, elevator access, a
                   <div key={i} className="h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
                 ))}
               </div>
+            </div>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Container className="flex-1 py-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="w-24 h-24 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Error Loading Property</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <div className="space-x-3">
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/properties')}>
+                Browse Properties
+              </Button>
             </div>
           </div>
         </Container>
