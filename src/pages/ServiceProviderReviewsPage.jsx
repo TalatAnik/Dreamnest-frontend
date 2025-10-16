@@ -5,7 +5,7 @@ import Button from '../components/Button.jsx';
 
 // API call helper
 const apiCall = async (endpoint, options = {}) => {
-  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
   const url = `${baseURL}${endpoint}`;
 
   const config = {
@@ -16,7 +16,7 @@ const apiCall = async (endpoint, options = {}) => {
     ...options,
   };
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('dreamnest-token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -56,7 +56,7 @@ export default function ServiceProviderReviewsPage() {
         setProvider({
           id: userData.id,
           name: `${userData.firstName} ${userData.lastName}`,
-          image: userData.avatar ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${userData.avatar}` : '/images/default-avatar.jpg',
+          image: userData.avatar ? `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${userData.avatar}` : '/images/default-avatar.jpg',
           coverImage: '/images/services/default-cover.jpg', // Default cover
           category: 'Service Provider',
           rating: 0, // Would need to calculate from reviews

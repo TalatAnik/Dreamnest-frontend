@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import Container from '../components/Container';
@@ -41,8 +41,45 @@ const RegisterPage = () => {
     businessDescription: ''
   });
 
+  const [passwordValidation, setPasswordValidation] = useState({
+    hasMinLength: false,
+    hasLowercase: false,
+    hasUppercase: false,
+    hasNumber: false,
+    passwordsMatch: false
+  });
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  // Trigger password validation when passwords change
+  useEffect(() => {
+    if (formData.password || formData.confirmPassword) {
+      validatePassword(formData.password, formData.confirmPassword);
+    }
+  }, [formData.password, formData.confirmPassword]);
+
+  // Password validation function
+  const validatePassword = (password, confirmPassword) => {
+    const validation = {
+      hasMinLength: password.length >= 6,
+      hasLowercase: /[a-z]/.test(password),
+      hasUppercase: /[A-Z]/.test(password),
+      hasNumber: /\d/.test(password),
+      passwordsMatch: password && confirmPassword ? password === confirmPassword : false
+    };
+    setPasswordValidation(validation);
+    return validation;
+  };
+
+  // Real-time password validation
+  const validatePasswordFields = (field, value) => {
+    if (field === 'password') {
+      validatePassword(value, formData.confirmPassword);
+    } else if (field === 'confirmPassword') {
+      validatePassword(formData.password, value);
+    }
+  };
 
   const userTypes = [
     {
@@ -125,6 +162,11 @@ const RegisterPage = () => {
         [field]: ''
       }));
     }
+
+    // Real-time password validation
+    if (field === 'password' || field === 'confirmPassword') {
+      validatePasswordFields(field, value);
+    }
   };
 
   const validateStep = () => {
@@ -137,7 +179,10 @@ const RegisterPage = () => {
       if (!formData.email.trim()) newErrors.email = 'Email is required';
       else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
       if (!formData.password) newErrors.password = 'Password is required';
-      else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+      else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+      else if (!/(?=.*[a-z])/.test(formData.password)) newErrors.password = 'Password must contain at least one lowercase letter';
+      else if (!/(?=.*[A-Z])/.test(formData.password)) newErrors.password = 'Password must contain at least one uppercase letter';
+      else if (!/(?=.*\d)/.test(formData.password)) newErrors.password = 'Password must contain at least one number';
       if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
       if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
     } else if (step === 3) {
@@ -185,42 +230,31 @@ const RegisterPage = () => {
     try {
       // Use AuthContext register method
       const userData = {
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        role: userType,
-        phone: formData.phone,
-        // Include role-specific data
-        ...(userType === 'owner' && {
-          businessName: formData.businessName,
-          businessType: formData.businessType,
-          taxId: formData.taxId
-        }),
-        ...(userType === 'service_provider' && {
-          companyName: formData.companyName,
-          serviceCategories: formData.serviceCategories,
-          experience: formData.experience,
-          businessDescription: formData.businessDescription
-        }),
-        ...(userType === 'renter' && {
-          preferences: formData.preferences
-        })
+        role: userType.toUpperCase(), // Convert to uppercase as expected by backend
+        phone: formData.phone
+        // Note: Role-specific data (businessName, serviceCategories, etc.) 
+        // is not handled by the backend during registration
+        // It should be collected through profile updates after registration
       };
 
       const user = await register(userData);
       
       // Redirect to appropriate dashboard based on role
       switch (user.role) {
-        case 'renter':
+        case 'RENTER':
           navigate('/dashboard');
           break;
-        case 'owner':
+        case 'OWNER':
           navigate('/dashboard/owner');
           break;
-        case 'service_provider':
+        case 'SERVICE_PROVIDER':
           navigate('/dashboard/provider');
           break;
-        case 'admin':
+        case 'ADMIN':
           navigate('/admin/dashboard');
           break;
         default:
@@ -421,6 +455,60 @@ const RegisterPage = () => {
             {errors.password && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
             )}
+            
+            {/* Password validation indicators */}
+            {formData.password && (
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center text-sm">
+                  <span className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center text-xs ${
+                    passwordValidation.hasMinLength 
+                      ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400' 
+                      : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                  }`}>
+                    {passwordValidation.hasMinLength ? '✓' : '○'}
+                  </span>
+                  <span className={passwordValidation.hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
+                    At least 6 characters
+                  </span>
+                </div>
+                <div className="flex items-center text-sm">
+                  <span className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center text-xs ${
+                    passwordValidation.hasLowercase 
+                      ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400' 
+                      : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                  }`}>
+                    {passwordValidation.hasLowercase ? '✓' : '○'}
+                  </span>
+                  <span className={passwordValidation.hasLowercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
+                    One lowercase letter
+                  </span>
+                </div>
+                <div className="flex items-center text-sm">
+                  <span className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center text-xs ${
+                    passwordValidation.hasUppercase 
+                      ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400' 
+                      : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                  }`}>
+                    {passwordValidation.hasUppercase ? '✓' : '○'}
+                  </span>
+                  <span className={passwordValidation.hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
+                    One uppercase letter
+                  </span>
+                </div>
+                <div className="flex items-center text-sm">
+                  <span className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center text-xs ${
+                    passwordValidation.hasNumber 
+                      ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400' 
+                      : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                  }`}>
+                    {passwordValidation.hasNumber ? '✓' : '○'}
+                  </span>
+                  <span className={passwordValidation.hasNumber ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
+                    One number
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -440,6 +528,24 @@ const RegisterPage = () => {
             />
             {errors.confirmPassword && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
+            )}
+            
+            {/* Password match indicator */}
+            {formData.confirmPassword && (
+              <div className="mt-2">
+                <div className="flex items-center text-sm">
+                  <span className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center text-xs ${
+                    passwordValidation.passwordsMatch 
+                      ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400' 
+                      : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400'
+                  }`}>
+                    {passwordValidation.passwordsMatch ? '✓' : '✗'}
+                  </span>
+                  <span className={passwordValidation.passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                    {passwordValidation.passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
+                  </span>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -812,9 +918,22 @@ const RegisterPage = () => {
               <Button variant="secondary" onClick={handleBack}>
                 Back
               </Button>
-              <Button type="submit" loading={loading}>
-                Create Account
-              </Button>
+              <div className="flex space-x-3">
+                <Button 
+                  variant="outline" 
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }}
+                  disabled={loading}
+                >
+                  Skip Preferences
+                </Button>
+                <Button type="submit" loading={loading}>
+                  Create Account
+                </Button>
+              </div>
             </div>
           </form>
         </div>

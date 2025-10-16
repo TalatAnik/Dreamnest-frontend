@@ -91,7 +91,7 @@ const OwnerProfilePage = () => {
 
   useEffect(() => {
     // Check authentication and role
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem('dreamnest-user');
     if (!userData) {
       navigate('/login');
       return;

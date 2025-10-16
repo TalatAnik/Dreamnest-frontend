@@ -57,7 +57,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     // Check authentication
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem('dreamnest-user');
     if (!userData) {
       navigate('/login');
       return;

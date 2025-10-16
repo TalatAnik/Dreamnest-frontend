@@ -137,7 +137,7 @@ const ServiceProviderDashboardPage = () => {
 
   useEffect(() => {
     // Check if user is logged in and has service_provider role
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem('dreamnest-user');
     if (!userData) {
       navigate('/login');
       return;

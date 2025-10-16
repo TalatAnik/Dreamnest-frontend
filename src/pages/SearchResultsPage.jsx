@@ -6,7 +6,7 @@ import PropertyCard from '../components/PropertyCard.jsx';
 
 // API call helper
 const apiCall = async (endpoint, options = {}) => {
-  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
   const url = `${baseURL}${endpoint}`;
 
   const config = {
@@ -17,7 +17,7 @@ const apiCall = async (endpoint, options = {}) => {
     ...options,
   };
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('dreamnest-token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -96,7 +96,7 @@ export default function SearchResultsPage() {
           bathrooms: property.bathrooms,
           sqft: property.area,
           image: property.images && property.images.length > 0 
-            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${property.images[0]}` 
+            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${property.images[0]}` 
             : '/images/properties/default.jpg',
           featured: false, // API doesn't have featured flag
           rating: property.averageRating,

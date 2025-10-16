@@ -5,7 +5,7 @@ import Button from '../components/Button.jsx';
 
 // API call helper
 const apiCall = async (endpoint, options = {}) => {
-  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
   const url = `${baseURL}${endpoint}`;
 
   const config = {
@@ -16,7 +16,7 @@ const apiCall = async (endpoint, options = {}) => {
     ...options,
   };
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('dreamnest-token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -65,7 +65,7 @@ export default function PropertyReviewsPage() {
           id: propertyData.id,
           title: propertyData.title,
           image: propertyData.images && propertyData.images.length > 0 
-            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${propertyData.images[0]}` 
+            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${propertyData.images[0]}` 
             : '/images/properties/default.jpg',
           type: propertyData.propertyType,
           location: `${propertyData.city}, ${propertyData.state}`,
